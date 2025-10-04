@@ -1,0 +1,121 @@
+.hero {
+    position: relative;
+    height: 70vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url('../images/hero.webp') center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    z-index: -1;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+}
+
+.featured-projects {
+    padding: 4rem 2rem;
+    background: white;
+    text-align: center;
+}
+
+.featured-projects h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #000080;
+}
+
+.spotlight-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    align-items: stretch;
+}
+
+.view-all {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.about-preview {
+    padding: 4rem 2rem;
+    background: #f8f9fa;
+    text-align: center;
+}
+
+.about-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #000080;
+}
+
+.about-content p {
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.stat-label {
+    display: block;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.contact-preview {
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #0066cc, aqua);
+    text-align: center;
+    color: white;
+}
+
+.contact-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.contact-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}

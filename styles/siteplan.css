@@ -1,0 +1,54 @@
+body {
+    background-color: antiquewhite;
+    font-family: "Montserrat", sans-serif;
+    margin: 0;
+    padding: 15px;
+    max-width: 800px;
+    margin: 0 auto;
+    color: #000080;
+}
+
+header {
+    background: #0066cc;
+    color: aliceblue;
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.navigation a {
+    padding: 10px 15px;
+    color: aliceblue;
+    text-decoration: none;
+    font-size: 20px;
+}
+
+.navigation a:hover {
+    color: #ffff00;
+}
+
+main h2 {
+    background: linear-gradient(135deg, #0066cc, aqua);
+    color: aliceblue;
+    padding: 10px;
+    margin: 20px 0 10px 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 480px) {
+    .navigation {
+        flex-direction: column;
+        align-items: center;
+    }
+}

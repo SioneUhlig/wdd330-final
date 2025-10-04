@@ -1,0 +1,31 @@
+{
+    "projects": [
+        {
+            "title": "Random Event",
+            "category": "furniture",
+            "image": "images/project_3.webp",
+            "alt": "Event",
+            "description": "Description.",
+            "price": "Price.",
+            "timeline": "Date."
+        },
+        {
+            "title": "Random Event",
+            "category": "",
+            "image": "images/wine.webp",
+            "alt": "Event",
+            "description": "Description.",
+            "price": "Price.",
+            "timeline": "Date."
+        },
+        {
+            "title": "Random Event",
+            "category": "storage",
+            "image": "images/shoe.webp",
+            "alt": "Event",
+            "description": "Description.",
+            "price": "Price.",
+            "timeline": "Date."
+        }
+    ]
+}

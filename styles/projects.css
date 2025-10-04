@@ -1,0 +1,136 @@
+.discover-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.visitor-message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.custom-work {
+    padding: 4rem 2rem;
+    background: #f8f9fa;
+    text-align: center;
+}
+
+.custom-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #000080;
+}
+
+.custom-content p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.filter-controls {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: white;
+    margin: 2rem auto;
+    max-width: 1200px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.filter-controls h3 {
+    color: #000080;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.filter-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background: white;
+    color: #000080;
+    text-decoration: none;
+    border: 2px solid #0066cc;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-size: 1rem;
+    min-width: 120px;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, aqua, antiquewhite);
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #0066cc, aqua);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+}
+
+.filter-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
+}
+
+/* Project count display */
+#project-count {
+    margin-top: 1rem;
+    color: #666;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .filter-controls {
+        margin: 1rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .filter-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .filter-btn {
+        width: 100%;
+        max-width: 200px;
+        padding: 1rem;
+    }
+
+    .filter-controls h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-controls {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+
+    .filter-btn {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+}
