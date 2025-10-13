@@ -1,9 +1,9 @@
 const API_CONFIG = {
     ticketmaster: {
-        apiKey: 'AZXBgygoWqnwsmMji9gGqAHvdTHzoyhu', 
-        baseUrl: 'https://app.ticketmaster.com/discovery/v2',
+        apiKey: 'AZXBgygoWqnwsmMji9gGqAHvdTHzoyhu',
+        baseUrl: 'http://localhost:3000/api',
         endpoints: {
-            searchEvents: '/events.json',
+            searchEvents: '/events',
             eventDetails: '/events/',
             classifications: '/classifications.json',
             venues: '/venues.json'
@@ -11,11 +11,11 @@ const API_CONFIG = {
     },
 
     googleMaps: {
-        apiKey: 'AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s', 
+        apiKey: 'AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s',
         libraries: ['places', 'geometry'],
         mapOptions: {
             zoom: 12,
-            center: { lat: 32.7767, lng: -96.7970 }, 
+            center: { lat: 32.7767, lng: -96.7970 },
             styles: []
         }
     },
@@ -33,7 +33,6 @@ const API = {
     ticketmasterRequest: async function (endpoint, params) {
         const url = new URL(API_CONFIG.ticketmaster.baseUrl + endpoint);
         params = params || {};
-        params.apikey = API_CONFIG.ticketmaster.apiKey;
 
         Object.keys(params).forEach(key => {
             if (params[key] !== null && params[key] !== undefined) {
@@ -50,7 +49,7 @@ const API = {
             });
 
             if (!response.ok) {
-                throw new Error(`Ticketmaster API Error: ${response.status} ${response.statusText}`);
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
             }
 
             return await response.json();
@@ -76,7 +75,6 @@ const API = {
             params.classificationName = options.classificationName;
         }
 
-     
         if (options.segmentName) {
             params.segmentName = options.segmentName;
         }
@@ -114,6 +112,7 @@ const API = {
         }
         return 'TX';
     },
+
     getStateCode: function (stateName) {
         const stateMap = {
             'texas': 'TX',
@@ -130,61 +129,11 @@ const API = {
         return stateMap[stateName.toLowerCase()] || 'TX';
     },
 
-    geocodeAddress: async function (address) {
-        if (API_CONFIG.googleMaps.apiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
-            throw new Error('Google Maps API key not configured');
-        }
-
-        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${API_CONFIG.googleMaps.apiKey}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.status === 'OK' && data.results.length > 0) {
-                return {
-                    lat: data.results[0].geometry.location.lat,
-                    lng: data.results[0].geometry.location.lng,
-                    formattedAddress: data.results[0].formatted_address
-                };
-            } else {
-                throw new Error('Geocoding failed: ' + data.status);
-            }
-        } catch (error) {
-            console.error('Geocoding error:', error);
-            throw error;
-        }
-    },
-
-    reverseGeocode: async function (lat, lng) {
-        if (API_CONFIG.googleMaps.apiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
-            return `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
-        }
-
-        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_CONFIG.googleMaps.apiKey}`;
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.status === 'OK' && data.results.length > 0) {
-                return data.results[0].formatted_address;
-            } else {
-                throw new Error('Reverse geocoding failed: ' + data.status);
-            }
-        } catch (error) {
-            console.error('Reverse geocoding error:', error);
-            return `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
-        }
-    },
     isConfigured: function () {
-        const ticketmasterConfigured = API_CONFIG.ticketmaster.apiKey !== 'YOUR_TICKETMASTER_API_KEY';
-        const mapsConfigured = API_CONFIG.googleMaps.apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY';
-
         return {
-            ticketmaster: ticketmasterConfigured,
-            googleMaps: mapsConfigured,
-            allConfigured: ticketmasterConfigured && mapsConfigured
+            ticketmaster: true,
+            googleMaps: true,
+            allConfigured: true
         };
     }
 };

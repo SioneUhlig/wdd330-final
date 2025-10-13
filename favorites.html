@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="styles/animations.css">
     <link rel="icon" href="images/favicon.webp" type="image/x-icon">
 
-    <script src="scripts/data-manager.js"></script>
+    <script src="scripts/api-config.js"></script>
     <script src="scripts/utility.js"></script>
     <script src="scripts/features.js"></script>
 
@@ -101,9 +101,9 @@
 
     <div id="event-modal" class="modal" style="display: none;">
         <div class="modal-content event-detail">
-            <button class="close" aria-label="Close event details">&times;</button>
-            <div id="event-detail-content">
-            </div>
+            <button onclick="getTickets('${eventId}')" class="btn-primary" style="flex: 1; min-width: 150px;">
+                <div id="event-detail-content">
+                </div>
         </div>
     </div>
 

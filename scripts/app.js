@@ -70,27 +70,84 @@ async function loadDiscoverEvents() {
     try {
         container.innerHTML = '<div class="loading-spinner"></div>';
 
-        const events = DataManager.generateMockEvents();
+        const location = new URLSearchParams(window.location.search).get('location') || 'Dallas, TX';
 
-        events.forEach(event => {
-            event.distance = Math.floor(Math.random() * 100) + 1;
+        const response = await API.searchEvents(location, {
+            limit: 50,
+            sortBy: 'date,asc'
         });
 
-        displayEvents(events, container);
+        if (response && response._embedded && response._embedded.events) {
+            const apiEvents = response._embedded.events;
+            const formattedEvents = apiEvents.map(event => formatDiscoverEvent(event));
 
-        updateEventCount(events.length);
+            displayEvents(formattedEvents, container);
+            updateEventCount(formattedEvents.length);
+        } else {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem;">No events found for this location.</p>';
+            updateEventCount(0);
+        }
 
     } catch (error) {
         console.error('Error loading events:', error);
-        container.innerHTML = '<p>Error loading events. Please try again.</p>';
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: red;">Unable to load events. Please make sure the server is running.</p>';
     }
 }
+
+function formatDiscoverEvent(apiEvent) {
+    const venue = apiEvent._embedded?.venues?.[0];
+    const prices = apiEvent.priceRanges?.[0];
+    const classification = apiEvent.classifications?.[0];
+
+    let category = 'community';
+    if (classification?.segment?.name) {
+        const segment = classification.segment.name.toLowerCase();
+        if (segment.includes('music')) category = 'music';
+        else if (segment.includes('sports')) category = 'sports';
+        else if (segment.includes('arts')) category = 'arts';
+        else if (segment.includes('film')) category = 'arts';
+        else if (segment.includes('food')) category = 'food';
+    }
+
+    const eventDate = apiEvent.dates?.start?.localDate || new Date().toISOString().split('T')[0];
+    const eventTime = apiEvent.dates?.start?.localTime || '7:00 PM';
+
+    let priceString = 'Check website';
+    if (prices) {
+        if (prices.min === prices.max) {
+            priceString = `$${prices.min.toFixed(2)}`;
+        } else {
+            priceString = `$${prices.min.toFixed(2)} - $${prices.max.toFixed(2)}`;
+        }
+    }
+
+    const distance = Math.floor(Math.random() * 50) + 1;
+
+    return {
+        id: apiEvent.id,
+        title: apiEvent.name,
+        description: apiEvent.info || apiEvent.pleaseNote || `Join us for ${apiEvent.name}. Don't miss this exciting event!`,
+        category: category,
+        date: eventDate,
+        time: eventTime,
+        location: venue?.city?.name ? `${venue.city.name}, ${venue.state?.stateCode || 'TX'}` : 'Dallas, TX',
+        venue: venue?.name || 'TBA',
+        price: priceString,
+        url: apiEvent.url,
+        distance: distance,
+        attendees: Math.floor(Math.random() * 500) + 50
+    };
+}
+
+let allLoadedEvents = [];
 
 function displayEvents(events, container) {
     if (events.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">No events found.</p>';
         return;
     }
+
+    allLoadedEvents = events;
 
     container.innerHTML = events.map(event => createEventCard(event)).join('');
 
@@ -109,13 +166,12 @@ function displayEvents(events, container) {
 }
 
 function createEventCard(event) {
-    const isFavorite = DataManager.isFavorite(event.id);
+    const isFavorite = isFavoriteEvent(event.id);
     const distance = event.distance ? `${event.distance} miles away` : '';
 
     return `
         <div class="event-card" data-event-id="${event.id}">
-            <img src="${event.image}" alt="${event.title}" class="event-card-image">
-            <div class="event-card-content">
+            <div class="event-card-content" style="padding: 2rem;">
                 <span class="event-category" style="background: ${getCategoryColor(event.category)}">
                     ${event.category}
                 </span>
@@ -124,6 +180,7 @@ function createEventCard(event) {
                 <p class="event-location">📍 ${event.location}</p>
                 ${distance ? `<p class="event-distance">🚗 ${distance}</p>` : ''}
                 <p class="event-price">💵 ${event.price}</p>
+                <p style="margin: 1rem 0; color: #6B7280;">${event.description.substring(0, 100)}${event.description.length > 100 ? '...' : ''}</p>
                 <div class="event-card-footer">
                     <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
                             data-event-id="${event.id}"
@@ -150,17 +207,31 @@ function getCategoryColor(category) {
     return colors[category] || '#40E0D0';
 }
 
-function toggleFavorite(eventId, button) {
-    DataManager.toggleFavorite(eventId);
-    const isFavorite = DataManager.isFavorite(eventId);
+function isFavoriteEvent(eventId) {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    return favorites.includes(eventId);
+}
 
-    button.textContent = isFavorite ? '❤️' : '🤍';
-    button.classList.toggle('active', isFavorite);
+function toggleFavorite(eventId, button) {
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+    if (favorites.includes(eventId)) {
+        favorites = favorites.filter(id => id !== eventId);
+        button.textContent = '🤍';
+        button.classList.remove('active');
+    } else {
+        favorites.push(eventId);
+        button.textContent = '❤️';
+        button.classList.add('active');
+    }
+
+    localStorage.setItem('favorites', JSON.stringify(favorites));
 
     updateFavoritesCount();
+
     if (typeof Utility !== 'undefined' && Utility.showToast) {
         Utility.showToast(
-            isFavorite ? 'Added to favorites!' : 'Removed from favorites',
+            favorites.includes(eventId) ? 'Added to favorites!' : 'Removed from favorites',
             'success'
         );
     }
@@ -181,21 +252,24 @@ function updateEventCount(count) {
     }
 }
 
+function getEventById(eventId) {
+    return allLoadedEvents.find(event => event.id === eventId);
+}
+
 function showEventModal(eventId) {
-    const event = DataManager.getEventById(eventId);
+    const event = getEventById(eventId);
     if (!event) return;
 
     const modal = document.getElementById('event-modal');
     const modalContent = document.getElementById('event-detail-content');
 
     if (modal && modalContent) {
-        const isFavorite = DataManager.isFavorite(eventId);
+        const isFavorite = isFavoriteEvent(eventId);
         const distance = event.distance ? `<p><strong>🚗 Distance:</strong> ${event.distance} miles away</p>` : '';
 
         modalContent.innerHTML = `
             <div style="padding: 2rem;">
                 <h2 style="color: #1F2937; margin-bottom: 1rem;">${event.title}</h2>
-                <img src="${event.image}" alt="${event.title}" style="width: 100%; border-radius: 12px; margin-bottom: 1.5rem;">
                 
                 <div style="display: grid; gap: 1rem; margin-bottom: 1.5rem;">
                     <p><strong>Category:</strong> <span style="color: ${getCategoryColor(event.category)}; font-weight: 600;">${event.category}</span></p>
@@ -218,7 +292,7 @@ function showEventModal(eventId) {
                             class="btn-secondary" style="flex: 1; min-width: 150px;">
                         ${isFavorite ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'}
                     </button>
-                    <button class="btn-primary" style="flex: 1; min-width: 150px;">
+                    <button onclick="window.getTicketsFromModal('${eventId}')" class="btn-primary" style="flex: 1; min-width: 150px;">
                         Get Tickets
                     </button>
                 </div>
@@ -226,19 +300,47 @@ function showEventModal(eventId) {
         `;
 
         modal.style.display = 'block';
-
-        DataManager.trackEventView(eventId);
     }
 }
 
+function getTickets(eventId) {
+    const event = getEventById(eventId);
+    if (!event) {
+        alert('Event not found');
+        return;
+    }
+
+    if (event.url) {
+        window.open(event.url, '_blank');
+    } else {
+        const searchQuery = encodeURIComponent(`${event.title} ${event.location} tickets`);
+        const ticketmasterSearchUrl = `https://www.ticketmaster.com/search?q=${searchQuery}`;
+        window.open(ticketmasterSearchUrl, '_blank');
+    }
+}
+
+function getTicketsFromModal(eventId) {
+    getTickets(eventId);
+}
+
 function toggleFavoriteFromModal(eventId) {
-    DataManager.toggleFavorite(eventId);
-    const isFavorite = DataManager.isFavorite(eventId);
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+    if (favorites.includes(eventId)) {
+        favorites = favorites.filter(id => id !== eventId);
+    } else {
+        favorites.push(eventId);
+    }
+
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+
+    const isFavorite = favorites.includes(eventId);
 
     const modalBtn = document.getElementById('modal-favorite-btn');
     if (modalBtn) {
         modalBtn.innerHTML = isFavorite ? '❤️ Remove from Favorites' : '🤍 Add to Favorites';
     }
+
     const pageBtn = document.querySelector(`.favorite-btn[data-event-id="${eventId}"]`);
     if (pageBtn) {
         pageBtn.textContent = isFavorite ? '❤️' : '🤍';
@@ -262,30 +364,22 @@ function applyFilters() {
     const distance = document.getElementById('distance-filter')?.value || 'all';
     const sort = document.getElementById('sort-filter')?.value || 'date';
 
-    let events = DataManager.generateMockEvents();
-
-    events.forEach(event => {
-        if (!event.distance) {
-            event.distance = Math.floor(Math.random() * 100) + 1;
-        }
-    });
+    let events = [...allLoadedEvents];
 
     if (category !== 'all') {
         events = events.filter(e => e.category === category);
     }
 
     if (price === 'free') {
-        events = events.filter(e => e.price === 'Free');
+        events = events.filter(e => e.price === 'Free' || e.price === 'Check website');
     } else if (price === 'paid') {
-        events = events.filter(e => e.price !== 'Free');
+        events = events.filter(e => e.price !== 'Free' && e.price !== 'Check website');
     }
-
 
     if (distance !== 'all') {
         const maxDistance = parseInt(distance);
         events = events.filter(e => e.distance <= maxDistance);
     }
-
 
     if (sort === 'date') {
         events.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -325,13 +419,13 @@ function initFavoritesPage() {
     setupShareFeature();
 }
 
-function loadFavorites() {
+async function loadFavorites() {
     const container = document.getElementById('favorites-container');
     if (!container) return;
 
-    const favorites = DataManager.getFavorites();
+    const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-    if (favorites.length === 0) {
+    if (favoriteIds.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#40E0D0" stroke-width="2">
@@ -342,19 +436,59 @@ function loadFavorites() {
                 <a href="discover.html" class="btn-primary">Discover Events</a>
             </div>
         `;
-    } else {
-        displayEvents(favorites, container);
-        const shareSection = document.getElementById('share-section');
-        if (shareSection) {
-            shareSection.style.display = 'block';
+        updateFavoritesCount();
+        return;
+    }
+
+    try {
+        container.innerHTML = '<div class="loading-spinner"></div>';
+
+        const response = await API.searchEvents('Dallas, TX', {
+            limit: 50,
+            sortBy: 'date,asc'
+        });
+
+        if (response && response._embedded && response._embedded.events) {
+            const apiEvents = response._embedded.events;
+            allLoadedEvents = apiEvents.map(event => formatDiscoverEvent(event));
+
+            const favorites = allLoadedEvents.filter(event => favoriteIds.includes(event.id));
+
+            if (favorites.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>Your favorited events are not in the current search</h2>
+                        <p>Try searching in different locations or visit the Discover page!</p>
+                        <a href="discover.html" class="btn-primary">Go to Discover</a>
+                    </div>
+                `;
+            } else {
+                displayEvents(favorites, container);
+                const shareSection = document.getElementById('share-section');
+                if (shareSection) {
+                    shareSection.style.display = 'block';
+                }
+            }
+        } else {
+            throw new Error('No events found');
         }
+    } catch (error) {
+        console.error('Error loading favorites:', error);
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: red;">Unable to load favorites. Please make sure the server is running.</p>';
     }
 
     updateFavoritesCount();
 }
 
-function filterFavorites(tab) {
-    const favorites = DataManager.getFavorites();
+async function filterFavorites(tab) {
+    const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+    if (allLoadedEvents.length === 0) {
+        await loadFavorites();
+        return;
+    }
+
+    let favorites = allLoadedEvents.filter(event => favoriteIds.includes(event.id));
     let filtered = favorites;
 
     const today = new Date();
@@ -379,23 +513,20 @@ function filterFavorites(tab) {
         displayEvents(filtered, container);
     }
 }
-
 function setupShareFeature() {
     const generateBtn = document.getElementById('generate-link');
     const copyBtn = document.getElementById('copy-link');
 
     if (generateBtn) {
         generateBtn.addEventListener('click', function () {
-            const message = document.getElementById('share-message')?.value || '';
-            const favorites = DataManager.getFavorites();
+            const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-            if (favorites.length === 0) {
+            if (favoriteIds.length === 0) {
                 alert('You need to have some favorite events to share!');
                 return;
             }
 
-            const shareId = Features.generateShareableList(favorites, message);
-            const shareUrl = `${window.location.origin}${window.location.pathname}?share=${shareId}`;
+            const shareUrl = `${window.location.origin}${window.location.pathname}`;
 
             const shareOutput = document.getElementById('share-output');
             const shareUrlInput = document.getElementById('share-url');
@@ -411,7 +542,9 @@ function setupShareFeature() {
         copyBtn.addEventListener('click', function () {
             const shareUrlInput = document.getElementById('share-url');
             if (shareUrlInput) {
-                Utility.copyToClipboard(shareUrlInput.value);
+                shareUrlInput.select();
+                document.execCommand('copy');
+                alert('Link copied to clipboard!');
             }
         });
     }
@@ -422,10 +555,6 @@ function handleSearch() {
     const location = locationInput?.value || 'Dallas, TX';
     const activeFilter = document.querySelector('.filter-chip.active');
     const category = activeFilter?.dataset.category || 'all';
-
-    if (typeof DataManager !== 'undefined') {
-        DataManager.saveSearchHistory({ location, category, date: new Date().toISOString() });
-    }
 
     window.location.href = `discover.html?location=${encodeURIComponent(location)}&category=${category}`;
 }
@@ -497,3 +626,6 @@ function initNavigation() {
 
 window.toggleFavoriteFromModal = toggleFavoriteFromModal;
 window.showEventModal = showEventModal;
+window.getTickets = getTickets;
+window.getTicketsFromModal = getTicketsFromModal;
+window.formatDiscoverEvent = formatDiscoverEvent;

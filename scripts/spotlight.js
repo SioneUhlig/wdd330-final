@@ -4,58 +4,117 @@ async function loadProjects() {
     try {
         spotlightContainer.innerHTML = '<p class="loading">Loading featured events...</p>';
 
-        const response = await fetch('data/projects.json');
-        const data = await response.json();
-        const projects = data.projects;
+        // Fetch real events from Ticketmaster API
+        const location = localStorage.getItem('userLocation') || 'Dallas, TX';
 
-        const spotlightProjects = getRandomSubset(projects, 3);
-        displayProjects(spotlightProjects);
+        const response = await API.searchEvents(location, {
+            limit: 20,
+            sortBy: 'date,asc'
+        });
+
+        if (response && response._embedded && response._embedded.events) {
+            const apiEvents = response._embedded.events;
+
+            // Convert API events to our format
+            const formattedEvents = apiEvents.map(event => formatApiEvent(event));
+
+            // Get 3 random events
+            const spotlightProjects = getRandomSubset(formattedEvents, 3);
+
+            displayProjects(spotlightProjects);
+        } else {
+            throw new Error('No events found');
+        }
 
     } catch (error) {
-        console.error('Error loading projects:', error);
-        spotlightContainer.innerHTML = '<p>Unable to load featured events. Please try again later.</p>';
+        console.error('Error loading events from API:', error);
+        spotlightContainer.innerHTML = '<p style="color: red;">Unable to load events. Please make sure the server is running.</p>';
     }
 }
 
-function displayProjects(projects) {
+function formatApiEvent(apiEvent) {
+    const venue = apiEvent._embedded?.venues?.[0];
+    const prices = apiEvent.priceRanges?.[0];
+    const classification = apiEvent.classifications?.[0];
+
+    let category = 'community';
+    if (classification?.segment?.name) {
+        const segment = classification.segment.name.toLowerCase();
+        if (segment.includes('music')) category = 'music';
+        else if (segment.includes('sports')) category = 'sports';
+        else if (segment.includes('arts')) category = 'arts';
+        else if (segment.includes('film')) category = 'arts';
+    }
+
+    const eventDate = apiEvent.dates?.start?.localDate || new Date().toISOString().split('T')[0];
+    const eventTime = apiEvent.dates?.start?.localTime || '7:00 PM';
+
+    let priceString = 'Check website';
+    if (prices) {
+        if (prices.min === prices.max) {
+            priceString = `$${prices.min.toFixed(2)}`;
+        } else {
+            priceString = `$${prices.min.toFixed(2)} - $${prices.max.toFixed(2)}`;
+        }
+    }
+
+    return {
+        id: apiEvent.id,
+        title: apiEvent.name,
+        description: apiEvent.info || apiEvent.pleaseNote || `Join us for ${apiEvent.name}. Don't miss this exciting event!`,
+        category: category,
+        date: eventDate,
+        time: eventTime,
+        location: venue?.city?.name ? `${venue.city.name}, ${venue.state?.stateCode || 'TX'}` : 'Dallas, TX',
+        venue: venue?.name || 'TBA',
+        price: priceString,
+        url: apiEvent.url,
+        attendees: Math.floor(Math.random() * 500) + 50
+    };
+}
+
+function getCategoryColorHex(category) {
+    const colors = {
+        music: '9333EA',
+        food: 'F59E0B',
+        arts: 'EC4899',
+        sports: '10B981',
+        community: '3B82F6'
+    };
+    return colors[category] || '40E0D0';
+}
+
+function displayProjects(events) {
     spotlightContainer.innerHTML = '';
 
-    projects.forEach(project => {
-        const projectCard = createProjectCard(project);
-        spotlightContainer.appendChild(projectCard);
+    events.forEach(event => {
+        const eventCard = createProjectCard(event);
+        spotlightContainer.appendChild(eventCard);
     });
 }
 
-function createProjectCard(project) {
+function createProjectCard(event) {
     const card = document.createElement('div');
     card.className = 'card';
 
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.includes(project.title);
+    const isFavorite = favorites.includes(event.id);
 
     card.innerHTML = `
-        <div class="card-image">
-            <img src="${project.image}" 
-                 alt="${project.alt}" 
-                 width="300" 
-                 height="200"
-                 loading="lazy"
-                 style="aspect-ratio: 3/2; object-fit: cover;">
-        </div>
-        <div class="card-content">
-            <h2>${project.title}</h2>
-            <p><strong>Category:</strong> ${project.category || 'Event'}</p>
-            <p><strong>Price:</strong> ${project.price}</p>
-            <p><strong>Date:</strong> ${project.timeline}</p>
-            <p>${project.description}</p>
+        <div class="card-content" style="padding: 2rem;">
+            <h2>${event.title}</h2>
+            <p><strong>Category:</strong> ${event.category || 'Event'}</p>
+            <p><strong>Price:</strong> ${event.price}</p>
+            <p><strong>Date:</strong> ${event.date} at ${event.time}</p>
+            <p>${event.description.substring(0, 100)}${event.description.length > 100 ? '...' : ''}</p>
             <div class="card-actions" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
                 <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
-                        data-event="${project.title}"
+                        data-event-id="${event.id}"
                         aria-label="Add to favorites"
                         style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
                     ${isFavorite ? '❤️' : '🤍'}
                 </button>
-                <button class="btn-primary" onclick="learnMore('${project.title}')">View Details</button>
+                <button class="btn-primary" onclick="showEventDetails('${event.id}')">View Details</button>
             </div>
         </div>
     `;
@@ -63,27 +122,26 @@ function createProjectCard(project) {
     const favoriteBtn = card.querySelector('.favorite-btn');
     favoriteBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        toggleFavorite(project.title, this);
+        toggleFavorite(event.id, this);
     });
 
     return card;
 }
 
-function toggleFavorite(eventTitle, button) {
+function toggleFavorite(eventId, button) {
     let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 
-    if (favorites.includes(eventTitle)) {
-        favorites = favorites.filter(fav => fav !== eventTitle);
+    if (favorites.includes(eventId)) {
+        favorites = favorites.filter(fav => fav !== eventId);
         button.textContent = '🤍';
         button.classList.remove('active');
     } else {
-        favorites.push(eventTitle);
+        favorites.push(eventId);
         button.textContent = '❤️';
         button.classList.add('active');
     }
 
     localStorage.setItem('favorites', JSON.stringify(favorites));
-
     updateFavoritesCount();
 }
 
@@ -100,8 +158,12 @@ function getRandomSubset(array, count) {
     return shuffled.slice(0, count);
 }
 
-function learnMore(projectTitle) {
-    alert(`Thank you for your interest in "${projectTitle}"! Click "View all Events" to see more details.`);
+function showEventDetails(eventId) {
+    if (typeof showEventModal === 'function') {
+        showEventModal(eventId);
+    } else {
+        alert('View Details - Event ID: ' + eventId);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -114,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function () {
             this.classList.add('active');
             const category = this.dataset.category;
             console.log('Filter selected:', category);
-
         });
     });
 
