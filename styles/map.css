@@ -200,8 +200,28 @@
 }
 
 .legend-item span:last-child {
-    color: #6B7280;
     font-size: 0.9rem;
+}
+
+#music {
+    color: #9333EA;
+}
+
+#food {
+    color: #F59E0B;
+}
+
+#art {
+    color: #EC4899;
+}
+
+#sports {
+    color: #10B981;
+
+}
+
+#community {
+    color: #3B82F6;
 }
 
 .loading-spinner {
