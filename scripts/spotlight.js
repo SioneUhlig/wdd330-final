@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
             searchHistory.unshift({ location, category, date: new Date().toISOString() });
             localStorage.setItem('searchHistory', JSON.stringify(searchHistory.slice(0, 10)));
 
-            window.location.href = `projects.html?location=${encodeURIComponent(location)}&category=${category}`;
+            window.location.href = `discover.html?location=${encodeURIComponent(location)}&category=${category}`;
         });
     }
 });
