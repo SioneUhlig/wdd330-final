@@ -5,41 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Sione Uhlig">
-    <title>Favorites - Sione's Event Planner</title>
-    <meta name="description" content="Explore Local Events.">
-
-    <meta property="og:title" content="Projects - Sione's Event Planner">
-    <meta property="og:description" content="Explore Explore Local Events.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://sioneuhlig.github.io/wdd231/final/index.html">
-    <meta property="og:image" content="https://sioneuhlig.github.io/wdd231/final/images/project_8.webp">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Local Event Explorer">
-    <meta property="og:site_name" content="Sione's Event planner">
+    <title>My Favorites - Local Event Discovery</title>
+    <meta name="description" content="View your saved and favorite events.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="styles/normalize.css">
-    <link rel="stylesheet" href="styles/base.css">
-    <link rel="stylesheet" href="styles/projects.css">
-    <link rel="stylesheet" href="styles/larger.css">
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/large.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="icon" href="images/favicon.webp" type="image/x-icon">
 
-    <script src="scripts/navigation.js" defer></script>
-    <script src="scripts/projects.js" defer></script>
-    <script src="scripts/footer.js" defer></script>
+    <script src="scripts/app.js" type="module" defer></script>
 </head>
 
 <body>
     <header>
         <div class="logo">
-            <img src="images/favicon.webp" alt="Sione's Woodcraft Logo" width="44" height="44">
-            <span class="site-name">Sione's Event planner</span>
+            <img src="images/favicon.webp" alt="Event Discovery Logo" width="44" height="44">
+            <span class="site-name">Local Event Discovery</span>
         </div>
 
         <button class="hamburger" id="ham-btn" aria-label="Toggle navigation menu">
@@ -50,62 +36,99 @@
 
         <nav id="nav-bar" class="navigation">
             <ul>
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="projects.html">Discover</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="discover.html">Discover</a></li>
                 <li><a href="map.html">Map</a></li>
-                <li><a href="favorites.html">Favorites</a></li>
+                <li><a href="favorites.html" class="active">Favorites</a></li>
             </ul>
         </nav>
     </header>
 
-
     <main>
-        <section class="section-hero">
-            <h1>Favorite Events!</h1>
-            <p>Your favorite local events found here. </p>
+        <section class="favorites-header">
+            <h1>My Favorite Events</h1>
+            <p>Events you've saved for later</p>
+            <div class="favorites-stats">
+                <span id="favorites-count">0 saved events</span>
+            </div>
         </section>
 
+        <section class="favorites-tabs">
+            <button class="tab-btn active" data-tab="all">All Saved</button>
+            <button class="tab-btn" data-tab="upcoming">Upcoming</button>
+            <button class="tab-btn" data-tab="past">Past Events</button>
+        </section>
+
+        <section class="favorites-section">
+            <div id="favorites-container" class="events-grid">
+                <div class="empty-state">
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#40E0D0" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <h2>No Saved Events Yet</h2>
+                    <p>Start exploring and save events you're interested in!</p>
+                    <a href="discover.html" class="btn-primary">Discover Events</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="share-section" id="share-section" style="display: none;">
+            <div class="share-container">
+                <h2>Share Your Event List</h2>
+                <p>Create a shareable link with a custom message</p>
+                
+                <div class="share-form">
+                    <textarea id="share-message" placeholder="Add a message (optional)" rows="3"></textarea>
+                    <button id="generate-link" class="btn-primary">Generate Share Link</button>
+                </div>
+
+                <div id="share-output" class="share-output" style="display: none;">
+                    <input type="text" id="share-url" readonly>
+                    <button id="copy-link" class="btn-secondary">Copy Link</button>
+                    <div class="share-buttons">
+                        <button class="share-btn facebook" data-platform="facebook">Share on Facebook</button>
+                        <button class="share-btn twitter" data-platform="twitter">Share on Twitter</button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <div id="event-modal" class="modal" style="display: none;">
+        <div class="modal-content event-detail">
+            <button class="close" aria-label="Close event details">&times;</button>
+            <div id="event-detail-content">
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-content">
             <div class="contact-info">
-                <h2>Sione's Event Planner</h2>
-                <p>1500 Marilla St</p>
+                <h3>Local Event Discovery</h3>
                 <p>Dallas, TX 75201</p>
-                <p>SioneCraft.com</p>
-                <p>(214)-670-3215</p>
+                <p>Find events that matter to you</p>
             </div>
 
             <div class="social">
-                <a href="https://www.facebook.com/" target="_blank"><img src="images/facebook.svg" alt="facebook"
-                        width="16" height="16"></a>
-                <a href="https://github.com/" target="_blank"><img src="images/githubimg.svg" alt="github logo"
-                        width="16" height="16"></a>
-                <a href="https://www.linkedin.com/" target="_blank"><img src="images/linkedin.svg" alt="linkedin"
-                        width="16" height="16"></a>
+                <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook">
+                    <img src="images/facebook.svg" alt="facebook" width="16" height="16">
+                </a>
+                <a href="https://github.com/" target="_blank" aria-label="GitHub">
+                    <img src="images/githubimg.svg" alt="github logo" width="16" height="16">
+                </a>
+                <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn">
+                    <img src="images/linkedin.svg" alt="linkedin" width="16" height="16">
+                </a>
             </div>
+            
             <div>
-                <p>WDD231 Class Project</p>
-                <p><a href="https://www.youtube.com/watch?v=lKh1Ijpfn8c">JavaScript Functionality Video </a></p>
+                <p>WDD330 Class Project</p>
                 <span id="yearjs"></span>
                 <div><span id="lastmodified"></span></div>
             </div>
         </div>
     </footer>
-    <div id="projectModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="modalContent">
-                <h2 id="modalTitle"></h2>
-                <img id="modalImage" src="" alt="">
-                <p id="modalDescription"></p>
-                <p id="modalPrice"></p>
-                <p id="modalTimeline"></p>
-            </div>
-        </div>
-    </div>
-
 </body>
 
 </html>
