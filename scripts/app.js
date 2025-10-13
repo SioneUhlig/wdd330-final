@@ -70,12 +70,13 @@ async function loadDiscoverEvents() {
     try {
         container.innerHTML = '<div class="loading-spinner"></div>';
 
-        
         const events = DataManager.generateMockEvents();
 
-    
-        displayEvents(events, container);
+        events.forEach(event => {
+            event.distance = Math.floor(Math.random() * 100) + 1;
+        });
 
+        displayEvents(events, container);
 
         updateEventCount(events.length);
 
@@ -109,6 +110,7 @@ function displayEvents(events, container) {
 
 function createEventCard(event) {
     const isFavorite = DataManager.isFavorite(event.id);
+    const distance = event.distance ? `${event.distance} miles away` : '';
 
     return `
         <div class="event-card" data-event-id="${event.id}">
@@ -120,6 +122,7 @@ function createEventCard(event) {
                 <h3>${event.title}</h3>
                 <p class="event-date">📅 ${event.date} at ${event.time}</p>
                 <p class="event-location">📍 ${event.location}</p>
+                ${distance ? `<p class="event-distance">🚗 ${distance}</p>` : ''}
                 <p class="event-price">💵 ${event.price}</p>
                 <div class="event-card-footer">
                     <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
@@ -187,6 +190,7 @@ function showEventModal(eventId) {
 
     if (modal && modalContent) {
         const isFavorite = DataManager.isFavorite(eventId);
+        const distance = event.distance ? `<p><strong>🚗 Distance:</strong> ${event.distance} miles away</p>` : '';
 
         modalContent.innerHTML = `
             <div style="padding: 2rem;">
@@ -199,6 +203,7 @@ function showEventModal(eventId) {
                     <p><strong>🕐 Time:</strong> ${event.time}</p>
                     <p><strong>📍 Location:</strong> ${event.location}</p>
                     <p><strong>🏢 Venue:</strong> ${event.venue}</p>
+                    ${distance}
                     <p><strong>💵 Price:</strong> ${event.price}</p>
                     <p><strong>👥 Interested:</strong> ${event.attendees} people</p>
                 </div>
@@ -254,23 +259,40 @@ function applyFilters() {
     const category = document.getElementById('category-filter')?.value || 'all';
     const date = document.getElementById('date-filter')?.value || 'all';
     const price = document.getElementById('price-filter')?.value || 'all';
+    const distance = document.getElementById('distance-filter')?.value || 'all';
     const sort = document.getElementById('sort-filter')?.value || 'date';
 
     let events = DataManager.generateMockEvents();
 
+    events.forEach(event => {
+        if (!event.distance) {
+            event.distance = Math.floor(Math.random() * 100) + 1;
+        }
+    });
+
     if (category !== 'all') {
         events = events.filter(e => e.category === category);
     }
+
     if (price === 'free') {
         events = events.filter(e => e.price === 'Free');
     } else if (price === 'paid') {
         events = events.filter(e => e.price !== 'Free');
     }
 
+
+    if (distance !== 'all') {
+        const maxDistance = parseInt(distance);
+        events = events.filter(e => e.distance <= maxDistance);
+    }
+
+
     if (sort === 'date') {
         events.sort((a, b) => new Date(a.date) - new Date(b.date));
     } else if (sort === 'popularity') {
         events.sort((a, b) => b.attendees - a.attendees);
+    } else if (sort === 'distance') {
+        events.sort((a, b) => a.distance - b.distance);
     }
 
     const container = document.getElementById('events-container');
@@ -279,7 +301,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-    const filters = ['category-filter', 'date-filter', 'price-filter', 'sort-filter'];
+    const filters = ['category-filter', 'date-filter', 'price-filter', 'distance-filter', 'sort-filter'];
     filters.forEach(filterId => {
         const filter = document.getElementById(filterId);
         if (filter) filter.selectedIndex = 0;
