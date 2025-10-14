@@ -155,7 +155,7 @@ if (quickFilterDropdown) {
         }
     });
 }
-}
+
 
 function updateQuickActionsDropdown() {
     const dropdown = document.getElementById('quick-filter-dropdown');
