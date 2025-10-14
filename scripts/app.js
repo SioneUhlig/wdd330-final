@@ -175,7 +175,7 @@ async function loadDiscoverEvents(locationOverride) {
         console.log('🔍 Discover Page: Searching for events in', location);
 
         // Make the API call
-        const response = await API.searchEvents(location, {
+        const response = await window.API.searchEvents(location, {
             limit: 50,
             sortBy: 'date,asc'
         });

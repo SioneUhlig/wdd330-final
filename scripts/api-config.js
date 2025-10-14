@@ -27,7 +27,7 @@ const API_CONFIG = {
         location: 'Dallas, TX',
         radius: '25',
         unit: 'miles',
-        limit: 20,
+        limit: 100,
         sortBy: 'date,asc'
     }
 };
