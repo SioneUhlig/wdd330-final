@@ -50,7 +50,7 @@ function initHomePage() {
 function initDiscoverPage() {
     console.log('Initializing discover page');
 
-    loadDiscoverEvents();
+    setTimeout(() => loadDiscoverEvents(), 100);
 
     const applyBtn = document.getElementById('apply-filters');
     if (applyBtn) {
