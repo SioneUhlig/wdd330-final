@@ -153,7 +153,6 @@ async function loadDiscoverEvents(locationOverride) {
     try {
         container.innerHTML = '<div class="loading-spinner"></div>';
 
-
         let location;
         if (locationOverride) {
             location = locationOverride;
@@ -161,40 +160,55 @@ async function loadDiscoverEvents(locationOverride) {
             location = new URLSearchParams(window.location.search).get('location') || 'Dallas, TX';
         }
 
-
         const locationInput = document.getElementById('discover-location');
         if (locationInput) {
             locationInput.value = location;
             locationInput.setAttribute('data-last-location', location);
         }
 
-
         localStorage.setItem('userLocation', location);
-
 
         const categoryFilter = document.getElementById('category-filter');
         const category = categoryFilter ? categoryFilter.value : 'all';
         saveSearchHistory(location, category);
 
+        console.log('🔍 Discover Page: Searching for events in', location);
+
+        // Make the API call
         const response = await API.searchEvents(location, {
             limit: 50,
             sortBy: 'date,asc'
         });
 
+        console.log('✅ Discover Page: API Response:', response);
+
         if (response && response._embedded && response._embedded.events) {
             const apiEvents = response._embedded.events;
+            console.log(`✅ Discover Page: Got ${apiEvents.length} events`);
+
             const formattedEvents = apiEvents.map(event => formatDiscoverEvent(event));
 
             displayEvents(formattedEvents, container);
             updateEventCount(formattedEvents.length);
         } else {
+            console.warn('⚠️ Discover Page: No events in response');
             container.innerHTML = '<p style="text-align: center; padding: 2rem;">No events found for this location.</p>';
             updateEventCount(0);
         }
 
     } catch (error) {
-        console.error('Error loading events:', error);
-        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: red;">Unable to load events. Please make sure the server is running.</p>';
+        console.error('❌ Discover Page: Error loading events:', error);
+        console.error('Error details:', error.message, error.stack);
+        container.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <p style="color: red; font-weight: bold;">Unable to load events</p>
+                <p style="color: #666; margin-top: 1rem;">Error: ${error.message}</p>
+                <p style="color: #666; margin-top: 0.5rem;">Please check the console for more details.</p>
+                <button onclick="location.reload()" class="btn-primary" style="margin-top: 1rem;">
+                    Retry
+                </button>
+            </div>
+        `;
     }
 }
 
