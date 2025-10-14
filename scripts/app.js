@@ -50,104 +50,95 @@ function initHomePage() {
 function initDiscoverPage() {
     console.log('Initializing discover page');
 
-    // Ensure DOM is ready before loading events
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => loadDiscoverEvents());
-    } else {
-        loadDiscoverEvents();
-    }
+    loadDiscoverEvents();
 
     const applyBtn = document.getElementById('apply-filters');
-    // ... rest of code
-}
+    if (applyBtn) {
+        applyBtn.addEventListener('click', applyFilters);
+    }
 
-const applyBtn = document.getElementById('apply-filters');
-if (applyBtn) {
-    applyBtn.addEventListener('click', applyFilters);
-}
+    const resetBtn = document.getElementById('reset-filters');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetFilters);
+    }
 
-const resetBtn = document.getElementById('reset-filters');
-if (resetBtn) {
-    resetBtn.addEventListener('click', resetFilters);
-}
+    const discoverGpsBtn = document.getElementById('discover-gps');
+    const discoverLocationInput = document.getElementById('discover-location');
 
-const discoverGpsBtn = document.getElementById('discover-gps');
-const discoverLocationInput = document.getElementById('discover-location');
-
-if (discoverGpsBtn && discoverLocationInput) {
-    discoverGpsBtn.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser');
-            return;
-        }
-
-        discoverGpsBtn.textContent = '⏳';
-        discoverGpsBtn.disabled = true;
-
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-
-                try {
-                    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s`);
-                    const data = await response.json();
-
-                    if (data.results && data.results.length > 0) {
-                        let city = '';
-                        let state = '';
-
-                        for (const component of data.results[0].address_components) {
-                            if (component.types.includes('locality')) {
-                                city = component.long_name;
-                            }
-                            if (component.types.includes('administrative_area_level_1')) {
-                                state = component.short_name;
-                            }
-                        }
-
-                        if (city && state) {
-                            const locationString = `${city}, ${state}`;
-                            discoverLocationInput.value = locationString;
-                            loadDiscoverEvents(locationString);
-                        } else {
-                            discoverLocationInput.value = 'Dallas, TX';
-                            alert('Could not determine city from your location. Using Dallas, TX');
-                            loadDiscoverEvents('Dallas, TX');
-                        }
-                    }
-                } catch (error) {
-                    console.error('Geocoding error:', error);
-                    discoverLocationInput.value = 'Dallas, TX';
-                    alert('Could not determine city from your location. Using Dallas, TX');
-                    loadDiscoverEvents('Dallas, TX');
-                }
-
-                discoverGpsBtn.textContent = '📍';
-                discoverGpsBtn.disabled = false;
-            },
-            (error) => {
-                console.error('Error getting location:', error);
-                alert('Unable to get your location. Please enter it manually.');
-                discoverGpsBtn.textContent = '📍';
-                discoverGpsBtn.disabled = false;
+    if (discoverGpsBtn && discoverLocationInput) {
+        discoverGpsBtn.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
             }
-        );
-    });
-}
 
-const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
-if (quickFilterDropdown) {
+            discoverGpsBtn.textContent = '⏳';
+            discoverGpsBtn.disabled = true;
 
-    updateQuickActionsDropdown();
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
 
-    quickFilterDropdown.addEventListener('change', function () {
-        const action = this.value;
-        if (action) {
-            handleQuickAction(action);
-            this.value = '';
-        }
-    });
-}
+                    try {
+                        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s`);
+                        const data = await response.json();
+
+                        if (data.results && data.results.length > 0) {
+                            let city = '';
+                            let state = '';
+
+                            for (const component of data.results[0].address_components) {
+                                if (component.types.includes('locality')) {
+                                    city = component.long_name;
+                                }
+                                if (component.types.includes('administrative_area_level_1')) {
+                                    state = component.short_name;
+                                }
+                            }
+
+                            if (city && state) {
+                                const locationString = `${city}, ${state}`;
+                                discoverLocationInput.value = locationString;
+                                loadDiscoverEvents(locationString);
+                            } else {
+                                discoverLocationInput.value = 'Dallas, TX';
+                                alert('Could not determine city from your location. Using Dallas, TX');
+                                loadDiscoverEvents('Dallas, TX');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Geocoding error:', error);
+                        discoverLocationInput.value = 'Dallas, TX';
+                        alert('Could not determine city from your location. Using Dallas, TX');
+                        loadDiscoverEvents('Dallas, TX');
+                    }
+
+                    discoverGpsBtn.textContent = '📍';
+                    discoverGpsBtn.disabled = false;
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                    alert('Unable to get your location. Please enter it manually.');
+                    discoverGpsBtn.textContent = '📍';
+                    discoverGpsBtn.disabled = false;
+                }
+            );
+        });
+    }
+
+    const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
+    if (quickFilterDropdown) {
+
+        updateQuickActionsDropdown();
+
+        quickFilterDropdown.addEventListener('change', function () {
+            const action = this.value;
+            if (action) {
+                handleQuickAction(action);
+                this.value = '';
+            }
+        });
+    }
 }
 
 function updateQuickActionsDropdown() {
@@ -156,11 +147,20 @@ function updateQuickActionsDropdown() {
 }
 
 async function loadDiscoverEvents(locationOverride) {
+    console.log('🚀🚀🚀 loadDiscoverEvents STARTED');
+    console.log('Location override:', locationOverride);
+
     const container = document.getElementById('events-container');
-    if (!container) return;
+    console.log('📦 Container found:', !!container);
+
+    if (!container) {
+        console.error('❌ Events container not found!');
+        return;
+    }
 
     try {
         container.innerHTML = '<div class="loading-spinner"></div>';
+        console.log('✅ Set loading spinner');
 
         let location;
         if (locationOverride) {
@@ -168,6 +168,7 @@ async function loadDiscoverEvents(locationOverride) {
         } else {
             location = new URLSearchParams(window.location.search).get('location') || 'Dallas, TX';
         }
+        console.log('📍 Using location:', location);
 
         const locationInput = document.getElementById('discover-location');
         if (locationInput) {
@@ -183,7 +184,6 @@ async function loadDiscoverEvents(locationOverride) {
 
         console.log('🔍 Discover Page: Searching for events in', location);
 
-        // Make the API call
         const response = await window.API.searchEvents(location, {
             limit: 50,
             sortBy: 'date,asc'
@@ -196,9 +196,11 @@ async function loadDiscoverEvents(locationOverride) {
             console.log(`✅ Discover Page: Got ${apiEvents.length} events`);
 
             const formattedEvents = apiEvents.map(event => formatDiscoverEvent(event));
+            console.log('✅ Formatted events:', formattedEvents.length);
 
             displayEvents(formattedEvents, container);
             updateEventCount(formattedEvents.length);
+            console.log('✅ Events displayed successfully');
         } else {
             console.warn('⚠️ Discover Page: No events in response');
             container.innerHTML = '<p style="text-align: center; padding: 2rem;">No events found for this location.</p>';
