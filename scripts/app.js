@@ -82,7 +82,18 @@ function initDiscoverPage() {
                     const { latitude, longitude } = position.coords;
 
                     try {
-                        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s`);
+                        const apiKey = window.API_CONFIG?.googleMaps?.apiKey || '';
+
+                        if (!apiKey) {
+                            console.warn('Google Maps API key not configured');
+                            discoverLocationInput.value = 'Dallas, TX';
+                            loadDiscoverEvents('Dallas, TX');
+                            discoverGpsBtn.textContent = '📍';
+                            discoverGpsBtn.disabled = false;
+                            return;
+                        }
+
+                        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`);
                         const data = await response.json();
 
                         if (data.results && data.results.length > 0) {
