@@ -1,7 +1,10 @@
 const API_CONFIG = {
     ticketmaster: {
         apiKey: 'AZXBgygoWqnwsmMji9gGqAHvdTHzoyhu',
-        baseUrl: 'http://localhost:3000/api',
+        // Use localhost for development, Netlify Functions for production
+        baseUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000/api'
+            : '/.netlify/functions',
         endpoints: {
             searchEvents: '/events',
             eventDetails: '/events/',
@@ -31,7 +34,7 @@ const API_CONFIG = {
 
 const API = {
     ticketmasterRequest: async function (endpoint, params) {
-        const url = new URL(API_CONFIG.ticketmaster.baseUrl + endpoint);
+        const url = new URL(API_CONFIG.ticketmaster.baseUrl + endpoint, window.location.origin);
         params = params || {};
 
         Object.keys(params).forEach(key => {
@@ -41,6 +44,8 @@ const API = {
         });
 
         try {
+            console.log('Making request to:', url.toString());
+
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {

@@ -1,0 +1,22 @@
+[build]
+  # Directory where Netlify Functions are located
+  functions = "netlify/functions"
+  
+  # Directory to publish (your root since index.html is there)
+  publish = "."
+  
+  # Build command (none needed for static site)
+  command = ""
+
+# Redirect API calls to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback (optional, for client-side routing)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
