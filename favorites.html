@@ -23,6 +23,7 @@
     <script src="scripts/features.js"></script>
 
     <script src="scripts/app.js" defer></script>
+    <script src="scripts/footer.js" defer></script>
 </head>
 
 <body>
@@ -101,18 +102,20 @@
 
     <div id="event-modal" class="modal" style="display: none;">
         <div class="modal-content event-detail">
-            <button onclick="getTickets('${eventId}')" class="btn-primary" style="flex: 1; min-width: 150px;">
-                <div id="event-detail-content">
-                </div>
+            <button class="close" aria-label="Close event details">&times;</button>
+            <div id="event-detail-content">
+            </div>
         </div>
     </div>
 
     <footer>
         <div class="footer-content">
             <div class="contact-info">
-                <h3>Local Event Discovery</h3>
+                <h3>Sione's Event Planner</h3>
+                <p>1500 Marilla St</p>
                 <p>Dallas, TX 75201</p>
-                <p>Find events that matter to you</p>
+                <p>SioneCraft.com</p>
+                <p>(214)-670-3215</p>
             </div>
 
             <div class="social">
@@ -129,6 +132,8 @@
 
             <div>
                 <p>WDD330 Class Project</p>
+                <p><a href="https://www.youtube.com/watch?v=lKh1Ijpfn8c" target="_blank">JavaScript Functionality
+                        Video</a></p>
                 <span id="yearjs"></span>
                 <div><span id="lastmodified"></span></div>
             </div>

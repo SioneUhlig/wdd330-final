@@ -60,79 +60,81 @@
             <span>☰</span> Filters
         </button>
 
-        <aside class="map-sidebar" id="map-sidebar">
-            <div class="sidebar-header">
-                <h2>Search & Filters</h2>
-                <button id="close-sidebar" class="close-sidebar-btn" aria-label="Close sidebar">×</button>
-            </div>
+        <div class="map-section-wrapper">
+            <aside class="map-sidebar" id="map-sidebar">
+                <div class="sidebar-header">
+                    <h2>Search & Filters</h2>
+                    <button id="close-sidebar" class="close-sidebar-btn" aria-label="Close sidebar">×</button>
+                </div>
 
-            <div class="map-filters">
-                <div class="filter-group">
-                    <label for="map-location">Location</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="map-location" placeholder="Enter city, state" value="Dallas, TX"
-                            style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
-                        <button id="use-gps-map" class="gps-btn" aria-label="Use my current location"
-                            title="Use my location"
-                            style="background: #40E0D0; border: none; border-radius: 8px; padding: 0.75rem; cursor: pointer; font-size: 1.2rem; min-width: 44px;">
-                            📍
-                        </button>
+                <div class="map-filters">
+                    <div class="filter-group">
+                        <label for="map-location">Location</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="map-location" placeholder="Enter city, state" value="Dallas, TX"
+                                style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;">
+                            <button id="use-gps-map" class="gps-btn" aria-label="Use my current location"
+                                title="Use my location"
+                                style="background: #40E0D0; border: none; border-radius: 8px; padding: 0.75rem; cursor: pointer; font-size: 1.2rem; min-width: 44px;">
+                                📍
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="filter-group">
-                    <label for="map-category">Category</label>
-                    <select id="map-category">
-                        <option value="all">All Events</option>
-                        <option value="music">Music</option>
-                        <option value="food">Food & Drink</option>
-                        <option value="arts">Arts</option>
-                        <option value="sports">Sports</option>
-                        <option value="community">Community</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label for="map-category">Category</label>
+                        <select id="map-category">
+                            <option value="all">All Events</option>
+                            <option value="music">Music</option>
+                            <option value="food">Food & Drink</option>
+                            <option value="arts">Arts</option>
+                            <option value="sports">Sports</option>
+                            <option value="community">Community</option>
+                        </select>
+                    </div>
 
-                <div class="filter-group">
-                    <label for="map-radius">Search Radius</label>
-                    <select id="map-radius">
-                        <option value="5">5 miles</option>
-                        <option value="10" selected>10 miles</option>
-                        <option value="25">25 miles</option>
-                        <option value="50">50 miles</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label for="map-radius">Search Radius</label>
+                        <select id="map-radius">
+                            <option value="5">5 miles</option>
+                            <option value="10" selected>10 miles</option>
+                            <option value="25">25 miles</option>
+                            <option value="50">50 miles</option>
+                        </select>
+                    </div>
 
-                <button id="update-map-search" class="btn-primary"
-                    style="width: 100%; margin-top: 1rem; padding: 0.875rem;">
-                    🔍 Update Search
-                </button>
-            </div>
-        </aside>
+                    <button id="update-map-search" class="btn-primary"
+                        style="width: 100%; margin-top: 1rem; padding: 0.875rem;">
+                        🔍 Update Search
+                    </button>
+                </div>
+            </aside>
 
-        <div class="map-container">
-            <div id="map" class="interactive-map"></div>
+            <div class="map-container">
+                <div id="map" class="interactive-map"></div>
 
-            <div class="map-legend">
-                <h3>Legend</h3>
-                <div class="legend-item">
-                    <span class="marker music">🎵</span>
-                    <span id="music">Music</span>
-                </div>
-                <div class="legend-item">
-                    <span class="marker food">🍔</span>
-                    <span id="food">Food</span>
-                </div>
-                <div class="legend-item">
-                    <span class="marker arts">🎨</span>
-                    <span id="art">Arts</span>
-                </div>
-                <div class="legend-item">
-                    <span class="marker sports">⚽</span>
-                    <span id="sports">Sports</span>
-                </div>
-                <div class="legend-item">
-                    <span class="marker community">👥</span>
-                    <span id="community">Community</span>
+                <div class="map-legend">
+                    <h3>Legend</h3>
+                    <div class="legend-item">
+                        <span class="marker music">🎵</span>
+                        <span id="music">Music</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="marker food">🍔</span>
+                        <span id="food">Food</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="marker arts">🎨</span>
+                        <span id="art">Arts</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="marker sports">⚽</span>
+                        <span id="sports">Sports</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="marker community">👥</span>
+                        <span id="community">Community</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -148,9 +150,11 @@
     <footer>
         <div class="footer-content">
             <div class="contact-info">
-                <h3>Local Event Discovery</h3>
+                <h3>Sione's Event Planner</h3>
+                <p>1500 Marilla St</p>
                 <p>Dallas, TX 75201</p>
-                <p>Find events that matter to you</p>
+                <p>SioneCraft.com</p>
+                <p>(214)-670-3215</p>
             </div>
 
             <div class="social">
@@ -167,6 +171,7 @@
 
             <div>
                 <p>WDD330 Class Project</p>
+                <p><a href="https://www.youtube.com/watch?v=lKh1Ijpfn8c" target="_blank">JavaScript Functionality Video</a></p>
                 <span id="yearjs"></span>
                 <div><span id="lastmodified"></span></div>
             </div>

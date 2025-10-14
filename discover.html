@@ -54,7 +54,32 @@
         </section>
 
         <section class="filter-controls">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                <h3 style="margin: 0; color: #1F2937;">Filters & Search</h3>
+                <select id="quick-filter-dropdown"
+                    style="padding: 0.5rem 1rem; border: 2px solid #3B82F6; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; color: #3B82F6; list-style: none;">
+                    <option value="" style="list-style: none;">📋 Quick Actions...</option>
+                    <option value="recent-filters" style="list-style: none;">🎛️ Load Last Filters</option>
+                    <option value="recent-location" style="list-style: none;">📍 Load Last Location</option>
+                    <option value="view-history" style="list-style: none;">👁️ View Recently Viewed</option>
+                    <option value="view-searches" style="list-style: none;">🔍 View Search History</option>
+                    <option value="view-storage" style="list-style: none;">📊 View All Storage Data</option>
+                </select>
+            </div>
+
             <div class="filter-wrapper">
+                <div class="filter-group">
+                    <label for="discover-location">Location</label>
+                    <div class="location-with-gps">
+                        <input type="text" id="discover-location" placeholder="Enter city, state" value="Dallas, TX">
+                        <button id="discover-gps" class="gps-btn-small" aria-label="Use my current location"
+                            title="Use my location">
+                            📍
+                        </button>
+                    </div>
+                </div>
+
                 <div class="filter-group">
                     <label for="category-filter">Category</label>
                     <select id="category-filter">
@@ -140,9 +165,11 @@
     <footer>
         <div class="footer-content">
             <div class="contact-info">
-                <h3>Local Event Discovery</h3>
+                <h3>Sione's Event Planner</h3>
+                <p>1500 Marilla St</p>
                 <p>Dallas, TX 75201</p>
-                <p>Find events that matter to you</p>
+                <p>SioneCraft.com</p>
+                <p>(214)-670-3215</p>
             </div>
 
             <div class="social">
@@ -159,6 +186,8 @@
 
             <div>
                 <p>WDD330 Class Project</p>
+                <p><a href="https://www.youtube.com/watch?v=lKh1Ijpfn8c" target="_blank">JavaScript Functionality
+                        Video</a></p>
                 <span id="yearjs"></span>
                 <div><span id="lastmodified"></span></div>
             </div>

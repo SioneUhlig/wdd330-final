@@ -323,8 +323,8 @@ function getCategoryEmoji(category) {
 }
 
 function isFavoriteEvent(eventId) {
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    return favorites.includes(eventId);
+    const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+    return favorites.hasOwnProperty(eventId);
 }
 
 function showEventInfoWindow(event, marker) {
@@ -383,18 +383,29 @@ function showEventInfoWindow(event, marker) {
 }
 
 function toggleMapFavorite(eventId) {
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+    const event = allEvents.find(e => e.id === eventId);
 
-    if (favorites.includes(eventId)) {
-        favorites = favorites.filter(id => id !== eventId);
-    } else {
-        favorites.push(eventId);
+    if (!event) {
+        console.error('Event not found:', eventId);
+        return;
     }
 
-    localStorage.setItem('favorites', JSON.stringify(favorites));
+    if (favorites.hasOwnProperty(eventId)) {
+        // Remove from favorites
+        delete favorites[eventId];
+        showToast('Removed from favorites', 'info');
+    } else {
+        // Add to favorites with full event data
+        favorites[eventId] = event;
+        showToast('Added to favorites!', 'success');
+    }
 
-    const isFavorite = favorites.includes(eventId);
+    localStorage.setItem('favoriteEvents', JSON.stringify(favorites));
 
+    const isFavorite = favorites.hasOwnProperty(eventId);
+
+    // Update button in info window
     const button = document.getElementById(`map-fav-btn-${eventId}`);
     if (button) {
         if (isFavorite) {
@@ -409,8 +420,6 @@ function toggleMapFavorite(eventId) {
             button.innerHTML = '🤍';
         }
     }
-
-    showToast(isFavorite ? 'Added to favorites!' : 'Removed from favorites', isFavorite ? 'success' : 'info');
 
     updateFavoritesCount();
 }
@@ -558,8 +567,9 @@ function setupSidebarToggle() {
 function updateFavoritesCount() {
     const countElement = document.getElementById('favorites-count');
     if (countElement) {
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-        countElement.textContent = `${favorites.length} saved events`;
+        const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+        const count = Object.keys(favorites).length;
+        countElement.textContent = `${count} saved events`;
     }
 }
 
