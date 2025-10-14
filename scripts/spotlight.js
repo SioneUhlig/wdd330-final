@@ -87,6 +87,9 @@ function getCategoryColorHex(category) {
 function displayProjects(events) {
     spotlightContainer.innerHTML = '';
 
+    // Store events globally so they can be accessed by modal
+    window.spotlightEvents = events;
+
     events.forEach(event => {
         const eventCard = createProjectCard(event);
         spotlightContainer.appendChild(eventCard);
@@ -97,8 +100,8 @@ function createProjectCard(event) {
     const card = document.createElement('div');
     card.className = 'card';
 
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.includes(event.id);
+    const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+    const isFavorite = favorites.hasOwnProperty(event.id);
 
     card.innerHTML = `
         <div class="card-content" style="padding: 2rem;">
@@ -114,7 +117,7 @@ function createProjectCard(event) {
                         style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
                     ${isFavorite ? '❤️' : '🤍'}
                 </button>
-                <button class="btn-primary" onclick="showEventDetails('${event.id}')">View Details</button>
+                <button class="btn-primary" onclick="window.showEventModal('${event.id}')">View Details</button>
             </div>
         </div>
     `;
@@ -122,34 +125,43 @@ function createProjectCard(event) {
     const favoriteBtn = card.querySelector('.favorite-btn');
     favoriteBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        toggleFavorite(event.id, this);
+        toggleSpotlightFavorite(event.id, this, event);
     });
 
     return card;
 }
 
-function toggleFavorite(eventId, button) {
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+function toggleSpotlightFavorite(eventId, button, eventData) {
+    let favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
 
-    if (favorites.includes(eventId)) {
-        favorites = favorites.filter(fav => fav !== eventId);
+    if (favorites.hasOwnProperty(eventId)) {
+        // Remove from favorites
+        delete favorites[eventId];
         button.textContent = '🤍';
         button.classList.remove('active');
+        if (typeof Utility !== 'undefined' && Utility.showToast) {
+            Utility.showToast('Removed from favorites', 'info');
+        }
     } else {
-        favorites.push(eventId);
+        // Add to favorites with full event data
+        favorites[eventId] = eventData;
         button.textContent = '❤️';
         button.classList.add('active');
+        if (typeof Utility !== 'undefined' && Utility.showToast) {
+            Utility.showToast('Added to favorites!', 'success');
+        }
     }
 
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    updateFavoritesCount();
+    localStorage.setItem('favoriteEvents', JSON.stringify(favorites));
+    updateSpotlightFavoritesCount();
 }
 
-function updateFavoritesCount() {
+function updateSpotlightFavoritesCount() {
     const countElement = document.getElementById('favorites-count');
     if (countElement) {
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-        countElement.textContent = `${favorites.length} saved events`;
+        const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+        const count = Object.keys(favorites).length;
+        countElement.textContent = `${count} saved events`;
     }
 }
 
@@ -159,6 +171,7 @@ function getRandomSubset(array, count) {
 }
 
 function showEventDetails(eventId) {
+    // Use the main modal function from app.js
     if (typeof showEventModal === 'function') {
         showEventModal(eventId);
     } else {

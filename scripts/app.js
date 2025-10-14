@@ -62,7 +62,6 @@ function initDiscoverPage() {
         resetBtn.addEventListener('click', resetFilters);
     }
 
-    // GPS button functionality
     const discoverGpsBtn = document.getElementById('discover-gps');
     const discoverLocationInput = document.getElementById('discover-location');
 
@@ -81,12 +80,10 @@ function initDiscoverPage() {
                     const { latitude, longitude } = position.coords;
 
                     try {
-                        // Use reverse geocoding to get city name from coordinates
                         const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s`);
                         const data = await response.json();
 
                         if (data.results && data.results.length > 0) {
-                            // Extract city and state from address components
                             let city = '';
                             let state = '';
 
@@ -104,7 +101,6 @@ function initDiscoverPage() {
                                 discoverLocationInput.value = locationString;
                                 loadDiscoverEvents(locationString);
                             } else {
-                                // Fallback to Dallas if we can't get city/state
                                 discoverLocationInput.value = 'Dallas, TX';
                                 alert('Could not determine city from your location. Using Dallas, TX');
                                 loadDiscoverEvents('Dallas, TX');
@@ -130,17 +126,16 @@ function initDiscoverPage() {
         });
     }
 
-    // Quick Actions Dropdown
     const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
     if (quickFilterDropdown) {
-        // Update dropdown options with counts
+
         updateQuickActionsDropdown();
 
         quickFilterDropdown.addEventListener('change', function () {
             const action = this.value;
             if (action) {
                 handleQuickAction(action);
-                this.value = ''; // Reset dropdown
+                this.value = '';
             }
         });
     }
@@ -149,18 +144,6 @@ function initDiscoverPage() {
 function updateQuickActionsDropdown() {
     const dropdown = document.getElementById('quick-filter-dropdown');
     if (!dropdown) return;
-
-    const recentlyViewedCount = getRecentlyViewedCount();
-    const searchHistoryCount = getSearchHistoryCount();
-
-    // Find and update existing options by value (don't create new ones)
-    Array.from(dropdown.options).forEach(option => {
-        if (option.value === 'view-history') {
-            option.textContent = `👁️ View Recently Viewed (${recentlyViewedCount})`;
-        } else if (option.value === 'view-searches') {
-            option.textContent = `🔍 View Search History (${searchHistoryCount})`;
-        }
-    });
 }
 
 async function loadDiscoverEvents(locationOverride) {
@@ -170,7 +153,7 @@ async function loadDiscoverEvents(locationOverride) {
     try {
         container.innerHTML = '<div class="loading-spinner"></div>';
 
-        // Use locationOverride if provided, otherwise check URL params, otherwise default
+
         let location;
         if (locationOverride) {
             location = locationOverride;
@@ -178,17 +161,17 @@ async function loadDiscoverEvents(locationOverride) {
             location = new URLSearchParams(window.location.search).get('location') || 'Dallas, TX';
         }
 
-        // Update the input field and store last loaded location
+
         const locationInput = document.getElementById('discover-location');
         if (locationInput) {
             locationInput.value = location;
             locationInput.setAttribute('data-last-location', location);
         }
 
-        // Save to localStorage
+
         localStorage.setItem('userLocation', location);
 
-        // Track search history
+
         const categoryFilter = document.getElementById('category-filter');
         const category = categoryFilter ? categoryFilter.value : 'all';
         saveSearchHistory(location, category);
@@ -339,16 +322,13 @@ function toggleFavorite(eventId, button, eventData) {
     let favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
 
     if (favorites.hasOwnProperty(eventId)) {
-        // Remove from favorites
         delete favorites[eventId];
         button.textContent = '🤍';
         button.classList.remove('active');
     } else {
-        // Add to favorites with full event data
         if (eventData) {
             favorites[eventId] = eventData;
         } else {
-            // Fallback: try to find event in allLoadedEvents
             const event = getEventById(eventId);
             if (event) {
                 favorites[eventId] = event;
@@ -399,7 +379,12 @@ function showEventModal(eventId) {
     // Track that user viewed this event
     trackRecentlyViewed(eventId);
 
-    // If not in current loaded events, check favorites
+    // If not in current loaded events, check spotlight events
+    if (!event && window.spotlightEvents) {
+        event = window.spotlightEvents.find(e => e.id === eventId);
+    }
+
+    // If still not found, check favorites
     if (!event) {
         const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
         event = favorites[eventId];
@@ -449,11 +434,9 @@ function showEventModal(eventId) {
         modal.style.display = 'block';
     }
 }
-
 function getTickets(eventId) {
     let event = getEventById(eventId);
 
-    // If not in current loaded events, check favorites
     if (!event) {
         const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
         event = favorites[eventId];
@@ -481,7 +464,6 @@ function toggleFavoriteFromModal(eventId) {
     let favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
     let event = getEventById(eventId);
 
-    // If not in current loaded events, get from favorites
     if (!event) {
         event = favorites[eventId];
     }
@@ -528,14 +510,11 @@ function applyFilters() {
     const locationInput = document.getElementById('discover-location');
     const currentLocation = locationInput?.value.trim();
 
-    // Check if location changed from what was last loaded
     const lastLoadedLocation = locationInput?.getAttribute('data-last-location') || 'Dallas, TX';
 
     if (currentLocation && currentLocation !== lastLoadedLocation) {
-        // Location changed - reload events from API
         locationInput?.setAttribute('data-last-location', currentLocation);
         loadDiscoverEvents(currentLocation).then(() => {
-            // After loading, reapply other filters if needed
             if (category !== 'all' || price !== 'all' || distance !== 'all' || sort !== 'date') {
                 applyClientSideFilters(category, price, distance, sort);
             }
@@ -543,7 +522,6 @@ function applyFilters() {
         return;
     }
 
-    // Location hasn't changed - just apply client-side filters
     applyClientSideFilters(category, price, distance, sort);
 }
 
@@ -577,7 +555,6 @@ function applyClientSideFilters(category, price, distance, sort) {
     displayEvents(events, container);
     updateEventCount(events.length);
 
-    // Save filter preferences after applying
     saveFilterPreferences();
 }
 
@@ -785,7 +762,6 @@ window.getTickets = getTickets;
 window.getTicketsFromModal = getTicketsFromModal;
 window.formatDiscoverEvent = formatDiscoverEvent;
 
-// LocalStorage Helper Functions for Quick Actions
 
 function getRecentlyViewedCount() {
     const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
@@ -797,17 +773,13 @@ function getSearchHistoryCount() {
     return searchHistory.length;
 }
 
-// Track recently viewed events
 function trackRecentlyViewed(eventId) {
     let recentEvents = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
 
-    // Remove if already exists
     recentEvents = recentEvents.filter(id => id !== eventId);
 
-    // Add to beginning
     recentEvents.unshift(eventId);
 
-    // Keep only last 10
     if (recentEvents.length > 10) {
         recentEvents = recentEvents.slice(0, 10);
     }
@@ -816,7 +788,6 @@ function trackRecentlyViewed(eventId) {
     console.log('Tracked recently viewed:', eventId);
 }
 
-// Save filter preferences
 function saveFilterPreferences() {
     const preferences = {
         category: document.getElementById('category-filter')?.value || 'all',
@@ -828,7 +799,6 @@ function saveFilterPreferences() {
     console.log('Saved filter preferences:', preferences);
 }
 
-// Save search history
 function saveSearchHistory(location, category) {
     let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
 
@@ -838,10 +808,8 @@ function saveSearchHistory(location, category) {
         timestamp: new Date().toISOString()
     };
 
-    // Add to beginning
     searchHistory.unshift(search);
 
-    // Keep only last 20 searches
     if (searchHistory.length > 20) {
         searchHistory = searchHistory.slice(0, 20);
     }
