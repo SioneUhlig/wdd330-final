@@ -50,95 +50,104 @@ function initHomePage() {
 function initDiscoverPage() {
     console.log('Initializing discover page');
 
-    setTimeout(() => loadDiscoverEvents(), 100);
+    // Ensure DOM is ready before loading events
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => loadDiscoverEvents());
+    } else {
+        loadDiscoverEvents();
+    }
 
     const applyBtn = document.getElementById('apply-filters');
-    if (applyBtn) {
-        applyBtn.addEventListener('click', applyFilters);
-    }
+    // ... rest of code
+}
 
-    const resetBtn = document.getElementById('reset-filters');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', resetFilters);
-    }
+const applyBtn = document.getElementById('apply-filters');
+if (applyBtn) {
+    applyBtn.addEventListener('click', applyFilters);
+}
 
-    const discoverGpsBtn = document.getElementById('discover-gps');
-    const discoverLocationInput = document.getElementById('discover-location');
+const resetBtn = document.getElementById('reset-filters');
+if (resetBtn) {
+    resetBtn.addEventListener('click', resetFilters);
+}
 
-    if (discoverGpsBtn && discoverLocationInput) {
-        discoverGpsBtn.addEventListener('click', () => {
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
-                return;
-            }
+const discoverGpsBtn = document.getElementById('discover-gps');
+const discoverLocationInput = document.getElementById('discover-location');
 
-            discoverGpsBtn.textContent = '⏳';
-            discoverGpsBtn.disabled = true;
+if (discoverGpsBtn && discoverLocationInput) {
+    discoverGpsBtn.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser');
+            return;
+        }
 
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude } = position.coords;
+        discoverGpsBtn.textContent = '⏳';
+        discoverGpsBtn.disabled = true;
 
-                    try {
-                        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s`);
-                        const data = await response.json();
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
 
-                        if (data.results && data.results.length > 0) {
-                            let city = '';
-                            let state = '';
+                try {
+                    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s`);
+                    const data = await response.json();
 
-                            for (const component of data.results[0].address_components) {
-                                if (component.types.includes('locality')) {
-                                    city = component.long_name;
-                                }
-                                if (component.types.includes('administrative_area_level_1')) {
-                                    state = component.short_name;
-                                }
+                    if (data.results && data.results.length > 0) {
+                        let city = '';
+                        let state = '';
+
+                        for (const component of data.results[0].address_components) {
+                            if (component.types.includes('locality')) {
+                                city = component.long_name;
                             }
-
-                            if (city && state) {
-                                const locationString = `${city}, ${state}`;
-                                discoverLocationInput.value = locationString;
-                                loadDiscoverEvents(locationString);
-                            } else {
-                                discoverLocationInput.value = 'Dallas, TX';
-                                alert('Could not determine city from your location. Using Dallas, TX');
-                                loadDiscoverEvents('Dallas, TX');
+                            if (component.types.includes('administrative_area_level_1')) {
+                                state = component.short_name;
                             }
                         }
-                    } catch (error) {
-                        console.error('Geocoding error:', error);
-                        discoverLocationInput.value = 'Dallas, TX';
-                        alert('Could not determine city from your location. Using Dallas, TX');
-                        loadDiscoverEvents('Dallas, TX');
+
+                        if (city && state) {
+                            const locationString = `${city}, ${state}`;
+                            discoverLocationInput.value = locationString;
+                            loadDiscoverEvents(locationString);
+                        } else {
+                            discoverLocationInput.value = 'Dallas, TX';
+                            alert('Could not determine city from your location. Using Dallas, TX');
+                            loadDiscoverEvents('Dallas, TX');
+                        }
                     }
-
-                    discoverGpsBtn.textContent = '📍';
-                    discoverGpsBtn.disabled = false;
-                },
-                (error) => {
-                    console.error('Error getting location:', error);
-                    alert('Unable to get your location. Please enter it manually.');
-                    discoverGpsBtn.textContent = '📍';
-                    discoverGpsBtn.disabled = false;
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                    discoverLocationInput.value = 'Dallas, TX';
+                    alert('Could not determine city from your location. Using Dallas, TX');
+                    loadDiscoverEvents('Dallas, TX');
                 }
-            );
-        });
-    }
 
-    const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
-    if (quickFilterDropdown) {
-
-        updateQuickActionsDropdown();
-
-        quickFilterDropdown.addEventListener('change', function () {
-            const action = this.value;
-            if (action) {
-                handleQuickAction(action);
-                this.value = '';
+                discoverGpsBtn.textContent = '📍';
+                discoverGpsBtn.disabled = false;
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+                alert('Unable to get your location. Please enter it manually.');
+                discoverGpsBtn.textContent = '📍';
+                discoverGpsBtn.disabled = false;
             }
-        });
-    }
+        );
+    });
+}
+
+const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
+if (quickFilterDropdown) {
+
+    updateQuickActionsDropdown();
+
+    quickFilterDropdown.addEventListener('change', function () {
+        const action = this.value;
+        if (action) {
+            handleQuickAction(action);
+            this.value = '';
+        }
+    });
+}
 }
 
 function updateQuickActionsDropdown() {
