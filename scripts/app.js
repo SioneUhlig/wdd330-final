@@ -48,9 +48,11 @@ function initHomePage() {
 }
 
 function initDiscoverPage() {
-    console.log('Initializing discover page');
-
-    loadDiscoverEvents();
+    console.log('✅ Initializing discover page');
+    setTimeout(() => {
+        console.log('⏰ Calling loadDiscoverEvents...');
+        loadDiscoverEvents();
+    }, 100);
 
     const applyBtn = document.getElementById('apply-filters');
     if (applyBtn) {
@@ -128,7 +130,6 @@ function initDiscoverPage() {
 
     const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
     if (quickFilterDropdown) {
-
         updateQuickActionsDropdown();
 
         quickFilterDropdown.addEventListener('change', function () {
@@ -139,6 +140,21 @@ function initDiscoverPage() {
             }
         });
     }
+}
+
+const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
+if (quickFilterDropdown) {
+
+    updateQuickActionsDropdown();
+
+    quickFilterDropdown.addEventListener('change', function () {
+        const action = this.value;
+        if (action) {
+            handleQuickAction(action);
+            this.value = '';
+        }
+    });
+}
 }
 
 function updateQuickActionsDropdown() {
@@ -184,6 +200,7 @@ async function loadDiscoverEvents(locationOverride) {
 
         console.log('🔍 Discover Page: Searching for events in', location);
 
+        // Make the API call
         const response = await window.API.searchEvents(location, {
             limit: 50,
             sortBy: 'date,asc'
