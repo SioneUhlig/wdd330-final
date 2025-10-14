@@ -1,7 +1,6 @@
 const API_CONFIG = {
     ticketmaster: {
         apiKey: 'AZXBgygoWqnwsmMji9gGqAHvdTHzoyhu',
-        // Use localhost for development, Netlify Functions for production
         baseUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3000/api'
             : '/.netlify/functions',
@@ -54,10 +53,18 @@ const API = {
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
                 throw new Error(`API Error: ${response.status} ${response.statusText}`);
             }
 
-            return await response.json();
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.message || data.error);
+            }
+
+            return data;
         } catch (error) {
             console.error('Ticketmaster API request failed:', error);
             throw error;
@@ -87,9 +94,11 @@ const API = {
         if (options.startDateTime) {
             params.startDateTime = options.startDateTime;
         }
+        
         if (options.endDateTime) {
             params.endDateTime = options.endDateTime;
         }
+        
         if (options.keyword) {
             params.keyword = options.keyword;
         }
@@ -129,7 +138,45 @@ const API = {
             'ohio': 'OH',
             'georgia': 'GA',
             'north carolina': 'NC',
-            'michigan': 'MI'
+            'michigan': 'MI',
+            'arizona': 'AZ',
+            'washington': 'WA',
+            'massachusetts': 'MA',
+            'tennessee': 'TN',
+            'indiana': 'IN',
+            'missouri': 'MO',
+            'maryland': 'MD',
+            'wisconsin': 'WI',
+            'colorado': 'CO',
+            'minnesota': 'MN',
+            'south carolina': 'SC',
+            'alabama': 'AL',
+            'louisiana': 'LA',
+            'kentucky': 'KY',
+            'oregon': 'OR',
+            'oklahoma': 'OK',
+            'connecticut': 'CT',
+            'utah': 'UT',
+            'iowa': 'IA',
+            'nevada': 'NV',
+            'arkansas': 'AR',
+            'mississippi': 'MS',
+            'kansas': 'KS',
+            'new mexico': 'NM',
+            'nebraska': 'NE',
+            'west virginia': 'WV',
+            'idaho': 'ID',
+            'hawaii': 'HI',
+            'new hampshire': 'NH',
+            'maine': 'ME',
+            'montana': 'MT',
+            'rhode island': 'RI',
+            'delaware': 'DE',
+            'south dakota': 'SD',
+            'north dakota': 'ND',
+            'alaska': 'AK',
+            'vermont': 'VT',
+            'wyoming': 'WY'
         };
         return stateMap[stateName.toLowerCase()] || 'TX';
     },
@@ -142,6 +189,7 @@ const API = {
         };
     }
 };
+
 
 window.API_CONFIG = API_CONFIG;
 window.API = API;
