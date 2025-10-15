@@ -2,11 +2,11 @@ const API_CONFIG = {
     ticketmaster: {
         apiKey: '',
         baseUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:3000/api'
-            : '/.netlify/functions',
+            ? 'http://localhost:3000'
+            : '',
         endpoints: {
-            searchEvents: '/events',
-            eventDetails: '/events/',
+            searchEvents: '/api/events',
+            eventDetails: '/api/events/',
             classifications: '/classifications.json',
             venues: '/venues.json'
         }
@@ -33,7 +33,8 @@ const API_CONFIG = {
 
 const API = {
     ticketmasterRequest: async function (endpoint, params) {
-        const url = new URL(API_CONFIG.ticketmaster.baseUrl + endpoint, window.location.origin);
+        const baseUrl = API_CONFIG.ticketmaster.baseUrl || window.location.origin;
+        const url = new URL(endpoint, baseUrl);
         params = params || {};
 
         Object.keys(params).forEach(key => {
@@ -59,7 +60,7 @@ const API = {
             }
 
             const data = await response.json();
-            
+
             if (data.error) {
                 throw new Error(data.message || data.error);
             }
@@ -94,11 +95,11 @@ const API = {
         if (options.startDateTime) {
             params.startDateTime = options.startDateTime;
         }
-        
+
         if (options.endDateTime) {
             params.endDateTime = options.endDateTime;
         }
-        
+
         if (options.keyword) {
             params.keyword = options.keyword;
         }
@@ -190,6 +191,5 @@ const API = {
     }
 };
 
-
 window.API_CONFIG = API_CONFIG;
-window.API = API;
+window.API = AP
