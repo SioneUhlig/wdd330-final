@@ -50,8 +50,11 @@ function initHomePage() {
 function initDiscoverPage() {
     console.log('✅ Initializing discover page');
 
-    // Call loadDiscoverEvents immediately instead of using setTimeout
-    loadDiscoverEvents();
+    // Wait a bit for DOM to be fully ready
+    setTimeout(() => {
+        console.log('⏰ Calling loadDiscoverEvents...');
+        loadDiscoverEvents();
+    }, 100);
 
     const applyBtn = document.getElementById('apply-filters');
     if (applyBtn) {
