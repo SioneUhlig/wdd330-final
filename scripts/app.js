@@ -1,6 +1,10 @@
-document.addEventListener('DOMContentLoaded', function () {
+if (document.readyState === 'loading') {
+    // DOM is still loading, wait for it
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    // DOM is already loaded, call immediately
     initializeApp();
-});
+}
 
 function initializeApp() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
