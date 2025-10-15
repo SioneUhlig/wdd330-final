@@ -7,28 +7,26 @@ if (document.readyState === 'loading') {
 }
 
 function initializeApp() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const pathname = window.location.pathname;
+    const currentPage = pathname.split('/').pop() || 'index.html';
 
-    switch (currentPage) {
-        case 'index.html':
-        case '':
-            initHomePage();
-            break;
-        case 'discover.html':
-            initDiscoverPage();
-            break;
-        case 'favorites.html':
-            initFavoritesPage();
-            break;
-        case 'map.html':
-            console.log('Map page - waiting for Google Maps API');
-            break;
+    console.log('🎯 Initializing app for page:', pathname);
+
+    if (currentPage === 'index.html' || currentPage === '' || pathname === '/' || pathname === '/index') {
+        initHomePage();
+    } else if (currentPage === 'discover.html' || pathname === '/discover') {
+        initDiscoverPage();
+    } else if (currentPage === 'favorites.html' || pathname === '/favorites') {
+        initFavoritesPage();
+    } else if (currentPage === 'map.html' || pathname === '/map') {
+        console.log('Map page - waiting for Google Maps API');
+    } else {
+        console.warn('Unknown page:', pathname);
     }
 
     initNavigation();
     updateFavoritesCount();
 }
-
 function initHomePage() {
     console.log('Initializing home page');
 
