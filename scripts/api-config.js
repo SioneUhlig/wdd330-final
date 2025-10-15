@@ -60,7 +60,7 @@ const API = {
             }
 
             const data = await response.json();
-
+            
             if (data.error) {
                 throw new Error(data.message || data.error);
             }
@@ -95,11 +95,11 @@ const API = {
         if (options.startDateTime) {
             params.startDateTime = options.startDateTime;
         }
-
+        
         if (options.endDateTime) {
             params.endDateTime = options.endDateTime;
         }
-
+        
         if (options.keyword) {
             params.keyword = options.keyword;
         }
@@ -191,5 +191,6 @@ const API = {
     }
 };
 
+
 window.API_CONFIG = API_CONFIG;
-window.API = AP
+window.API = API;
