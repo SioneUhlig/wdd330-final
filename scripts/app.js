@@ -155,21 +155,6 @@ function initDiscoverPage() {
     }
 }
 
-const quickFilterDropdown = document.getElementById('quick-filter-dropdown');
-if (quickFilterDropdown) {
-
-    updateQuickActionsDropdown();
-
-    quickFilterDropdown.addEventListener('change', function () {
-        const action = this.value;
-        if (action) {
-            handleQuickAction(action);
-            this.value = '';
-        }
-    });
-}
-
-
 function updateQuickActionsDropdown() {
     const dropdown = document.getElementById('quick-filter-dropdown');
     if (!dropdown) return;
