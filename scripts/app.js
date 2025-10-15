@@ -49,10 +49,9 @@ function initHomePage() {
 
 function initDiscoverPage() {
     console.log('✅ Initializing discover page');
-    setTimeout(() => {
-        console.log('⏰ Calling loadDiscoverEvents...');
-        loadDiscoverEvents();
-    }, 100);
+
+    // Call loadDiscoverEvents immediately instead of using setTimeout
+    loadDiscoverEvents();
 
     const applyBtn = document.getElementById('apply-filters');
     if (applyBtn) {
