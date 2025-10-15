@@ -8,6 +8,9 @@
   # Build command (none needed for static site)
   command = ""
 
+[build.environment]
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s"
+
 # Redirect API calls to Netlify Functions
 [[redirects]]
   from = "/api/*"
@@ -20,12 +23,3 @@
   to = "/index.html"
   status = 200
   force = false
-  
-
-  [build]
-  functions = "netlify/functions"
-  publish = "."
-  ignore = "/bin/false"
-
-[build.environment]
-  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyCV-awjx4Qa0OWgQlT8bbYaxjLEawWfu7s"
