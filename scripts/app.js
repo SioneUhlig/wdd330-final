@@ -1,3 +1,5 @@
+let allLoadedEvents = [];
+
 if (document.readyState === 'loading') {
     // DOM is still loading, wait for it
     document.addEventListener('DOMContentLoaded', initializeApp);
@@ -285,7 +287,6 @@ function formatDiscoverEvent(apiEvent) {
     };
 }
 
-let allLoadedEvents = [];
 
 function displayEvents(events, container) {
     if (events.length === 0) {
