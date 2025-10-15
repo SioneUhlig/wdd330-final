@@ -4,7 +4,6 @@ async function loadProjects() {
     try {
         spotlightContainer.innerHTML = '<p class="loading">Loading featured events...</p>';
 
-        // Fetch real events from Ticketmaster API
         const location = localStorage.getItem('userLocation') || 'Dallas, TX';
 
         const response = await API.searchEvents(location, {
@@ -15,10 +14,8 @@ async function loadProjects() {
         if (response && response._embedded && response._embedded.events) {
             const apiEvents = response._embedded.events;
 
-            // Convert API events to our format
             const formattedEvents = apiEvents.map(event => formatApiEvent(event));
 
-            // Get 3 random events
             const spotlightProjects = getRandomSubset(formattedEvents, 3);
 
             displayProjects(spotlightProjects);
@@ -87,7 +84,6 @@ function getCategoryColorHex(category) {
 function displayProjects(events) {
     spotlightContainer.innerHTML = '';
 
-    // Store events globally so they can be accessed by modal
     window.spotlightEvents = events;
 
     events.forEach(event => {
@@ -114,13 +110,19 @@ function createProjectCard(event) {
                 <button class="favorite-btn ${isFavorite ? 'active' : ''}" 
                         data-event-id="${event.id}"
                         aria-label="Add to favorites"
-                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
+                        style="background: white; border: 2px solid #E5E7EB; cursor: pointer; font-size: 1.5rem; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
                     ${isFavorite ? '❤️' : '🤍'}
                 </button>
-                <button class="btn-primary" onclick="window.showEventModal('${event.id}')">View Details</button>
+                <button class="btn-primary view-details-btn" data-event-id="${event.id}">View Details</button>
             </div>
         </div>
     `;
+
+    const viewDetailsBtn = card.querySelector('.view-details-btn');
+    viewDetailsBtn.addEventListener('click', function () {
+        const eventId = this.getAttribute('data-event-id');
+        showSpotlightEventModal(eventId);
+    });
 
     const favoriteBtn = card.querySelector('.favorite-btn');
     favoriteBtn.addEventListener('click', function (e) {
@@ -131,11 +133,114 @@ function createProjectCard(event) {
     return card;
 }
 
+function showSpotlightEventModal(eventId) {
+    let event = window.spotlightEvents?.find(e => e.id === eventId);
+
+    if (!event && typeof window.showEventModal === 'function') {
+        window.showEventModal(eventId);
+        return;
+    }
+
+    if (!event) {
+        const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+        event = favorites[eventId];
+    }
+
+    if (!event) {
+        console.error('Event not found:', eventId);
+        alert('Unable to load event details. Please try again.');
+        return;
+    }
+
+    let modal = document.getElementById('event-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'event-modal';
+        modal.className = 'modal';
+        modal.style.display = 'none';
+        modal.innerHTML = `
+            <div class="modal-content event-detail">
+                <button class="close" aria-label="Close event details">&times;</button>
+                <div id="event-detail-content"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const closeBtn = modal.querySelector('.close');
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    const modalContent = document.getElementById('event-detail-content');
+    const isFavorite = isFavoriteEvent(eventId);
+
+    modalContent.innerHTML = `
+        <div style="padding: 2rem;">
+            <h2 style="color: #1F2937; margin-bottom: 1rem;">${event.title}</h2>
+            
+            <div style="display: grid; gap: 1rem; margin-bottom: 1.5rem;">
+                <p><strong>Category:</strong> <span style="color: ${getCategoryColor(event.category)}; font-weight: 600;">${event.category}</span></p>
+                <p><strong>📅 Date:</strong> ${event.date}</p>
+                <p><strong>🕐 Time:</strong> ${event.time}</p>
+                <p><strong>📍 Location:</strong> ${event.location}</p>
+                <p><strong>🏢 Venue:</strong> ${event.venue}</p>
+                <p><strong>💵 Price:</strong> ${event.price}</p>
+                <p><strong>👥 Interested:</strong> ${event.attendees} people</p>
+            </div>
+            
+            <p style="line-height: 1.6; color: #374151; margin-bottom: 1.5rem;">
+                ${event.description}
+            </p>
+            
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="toggleFavoriteFromSpotlight('${eventId}')" 
+                        id="modal-favorite-btn-spotlight"
+                        class="btn-secondary" style="flex: 1; min-width: 150px;">
+                    ${isFavorite ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'}
+                </button>
+                <button onclick="getTicketsFromSpotlight('${eventId}')" class="btn-primary" style="flex: 1; min-width: 150px;">
+                    Get Tickets
+                </button>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'block';
+}
+
+function getCategoryColor(category) {
+    const colors = {
+        music: '#D8B4FE',
+        food: '#78350F',
+        arts: '#EC4899',
+        sports: '#10B981',
+        community: '#3B82F6'
+    };
+    return colors[category] || '#40E0D0';
+}
+
+function isFavoriteEvent(eventId) {
+    const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+    return favorites.hasOwnProperty(eventId);
+}
+
 function toggleSpotlightFavorite(eventId, button, eventData) {
     let favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
 
     if (favorites.hasOwnProperty(eventId)) {
-        // Remove from favorites
         delete favorites[eventId];
         button.textContent = '🤍';
         button.classList.remove('active');
@@ -143,7 +248,6 @@ function toggleSpotlightFavorite(eventId, button, eventData) {
             Utility.showToast('Removed from favorites', 'info');
         }
     } else {
-        // Add to favorites with full event data
         favorites[eventId] = eventData;
         button.textContent = '❤️';
         button.classList.add('active');
@@ -154,6 +258,69 @@ function toggleSpotlightFavorite(eventId, button, eventData) {
 
     localStorage.setItem('favoriteEvents', JSON.stringify(favorites));
     updateSpotlightFavoritesCount();
+}
+
+function toggleFavoriteFromSpotlight(eventId) {
+    let favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+    let event = window.spotlightEvents?.find(e => e.id === eventId);
+
+    if (!event) {
+        event = favorites[eventId];
+    }
+
+    if (favorites.hasOwnProperty(eventId)) {
+        delete favorites[eventId];
+    } else {
+        if (event) {
+            favorites[eventId] = event;
+        }
+    }
+
+    localStorage.setItem('favoriteEvents', JSON.stringify(favorites));
+
+    const isFavorite = favorites.hasOwnProperty(eventId);
+
+    const modalBtn = document.getElementById('modal-favorite-btn-spotlight');
+    if (modalBtn) {
+        modalBtn.innerHTML = isFavorite ? '❤️ Remove from Favorites' : '🤍 Add to Favorites';
+    }
+
+    const pageBtn = document.querySelector(`.favorite-btn[data-event-id="${eventId}"]`);
+    if (pageBtn) {
+        pageBtn.textContent = isFavorite ? '❤️' : '🤍';
+        pageBtn.classList.toggle('active', isFavorite);
+    }
+
+    updateSpotlightFavoritesCount();
+
+    if (typeof Utility !== 'undefined' && Utility.showToast) {
+        Utility.showToast(
+            isFavorite ? 'Added to favorites!' : 'Removed from favorites',
+            'success'
+        );
+    }
+}
+
+function getTicketsFromSpotlight(eventId) {
+    let event = window.spotlightEvents?.find(e => e.id === eventId);
+
+    if (!event) {
+        const favorites = JSON.parse(localStorage.getItem('favoriteEvents') || '{}');
+        event = favorites[eventId];
+    }
+
+    if (!event) {
+        alert('Event not found');
+        return;
+    }
+
+    if (event.url) {
+        window.open(event.url, '_blank');
+    } else {
+        const searchQuery = encodeURIComponent(`${event.title} ${event.location} tickets`);
+        const ticketmasterSearchUrl = `https://www.ticketmaster.com/search?q=${searchQuery}`;
+        window.open(ticketmasterSearchUrl, '_blank');
+    }
 }
 
 function updateSpotlightFavoritesCount() {
@@ -170,14 +337,9 @@ function getRandomSubset(array, count) {
     return shuffled.slice(0, count);
 }
 
-function showEventDetails(eventId) {
-    // Use the main modal function from app.js
-    if (typeof showEventModal === 'function') {
-        showEventModal(eventId);
-    } else {
-        alert('View Details - Event ID: ' + eventId);
-    }
-}
+window.toggleFavoriteFromSpotlight = toggleFavoriteFromSpotlight;
+window.getTicketsFromSpotlight = getTicketsFromSpotlight;
+window.showSpotlightEventModal = showSpotlightEventModal;
 
 document.addEventListener('DOMContentLoaded', function () {
     loadProjects();

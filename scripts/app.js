@@ -555,6 +555,9 @@ function applyFilters() {
 
     const lastLoadedLocation = locationInput?.getAttribute('data-last-location') || 'Dallas, TX';
 
+    saveFilterPreferences();
+
+
     if (currentLocation && currentLocation !== lastLoadedLocation) {
         locationInput?.setAttribute('data-last-location', currentLocation);
         loadDiscoverEvents(currentLocation).then(() => {
@@ -885,6 +888,8 @@ function loadLastFilters() {
     const saved = localStorage.getItem('filterPreferences');
     if (saved) {
         const preferences = JSON.parse(saved);
+
+        // Set all filter values in the UI
         if (document.getElementById('category-filter')) {
             document.getElementById('category-filter').value = preferences.category || 'all';
         }
@@ -897,10 +902,18 @@ function loadLastFilters() {
         if (document.getElementById('sort-filter')) {
             document.getElementById('sort-filter').value = preferences.sortBy || 'date';
         }
+
+        applyClientSideFilters(
+            preferences.category || 'all',
+            preferences.priceFilter || 'all',
+            preferences.distanceFilter || 'all',
+            preferences.sortBy || 'date'
+        );
+
         if (typeof Utility !== 'undefined' && Utility.showToast) {
-            Utility.showToast('✅ Last filter settings restored!', 'success');
+            Utility.showToast('✅ Last filter settings restored and applied!', 'success');
         } else {
-            alert('✅ Last filter settings restored!');
+            alert('✅ Last filter settings restored and applied!');
         }
     } else {
         alert('No saved filter preferences found. Use filters and they will be saved automatically!');
@@ -908,18 +921,75 @@ function loadLastFilters() {
 }
 
 function loadLastLocation() {
-    const lastLocation = localStorage.getItem('userLocation');
+    // Get the search history instead of just userLocation
+    const searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
     const locationInput = document.getElementById('discover-location');
 
-    if (lastLocation && locationInput) {
-        locationInput.value = lastLocation;
-        loadDiscoverEvents(lastLocation);
-        if (typeof Utility !== 'undefined' && Utility.showToast) {
-            Utility.showToast('📍 Last location loaded!', 'success');
-        }
-    } else {
-        alert('No saved location found. Use the GPS button or enter a location!');
+    console.log('Search history:', searchHistory);
+    console.log('Current location in input:', locationInput?.value);
+
+    if (searchHistory.length === 0) {
+        alert('No search history found. Search for locations and they will be saved automatically!');
+        return;
     }
+
+    // ⭐ FIX: Get the SECOND most recent location (index 1), not the first (index 0)
+    // Because the first one is already loaded on the page
+    let locationToLoad = null;
+    let searchEntry = null;
+
+    if (searchHistory.length > 1) {
+        // Use second most recent if available
+        searchEntry = searchHistory[1];
+        locationToLoad = searchEntry.location;
+    } else {
+        // If only one location in history, use it anyway
+        searchEntry = searchHistory[0];
+        locationToLoad = searchEntry.location;
+    }
+
+    console.log('Loading location:', locationToLoad);
+
+    if (!locationInput) {
+        console.error('Location input not found. Make sure you are on the Discover page.');
+        alert('This feature only works on the Discover page.');
+        return;
+    }
+
+    // Check if this location is different from what's currently shown
+    const currentLocation = locationInput.value.trim();
+    if (currentLocation === locationToLoad) {
+        if (typeof Utility !== 'undefined' && Utility.showToast) {
+            Utility.showToast('ℹ️ This location is already loaded!', 'info');
+        } else {
+            alert('This location is already loaded!');
+        }
+        return;
+    }
+
+    // Set the input value
+    locationInput.value = locationToLoad;
+
+    // Update the data-last-location attribute
+    locationInput.setAttribute('data-last-location', locationToLoad);
+
+    // Show loading feedback immediately
+    if (typeof Utility !== 'undefined' && Utility.showToast) {
+        Utility.showToast('📍 Loading events for: ' + locationToLoad, 'info');
+    }
+
+    // Load events for this location
+    loadDiscoverEvents(locationToLoad).then(() => {
+        // Success message after events load
+        if (typeof Utility !== 'undefined' && Utility.showToast) {
+            Utility.showToast('✅ Previous location loaded successfully!', 'success');
+        }
+    }).catch(error => {
+        console.error('Error loading events:', error);
+        if (typeof Utility !== 'undefined' && Utility.showToast) {
+            Utility.showToast('❌ Error loading events for this location', 'error');
+        }
+    });
 }
 
 function showRecentlyViewed() {
