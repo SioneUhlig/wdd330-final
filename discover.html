@@ -199,6 +199,17 @@
         console.log('Current hostname:', window.location.hostname);
         console.log('API Base URL:', window.API_CONFIG?.ticketmaster?.baseUrl);
         console.log('Full API config:', window.API_CONFIG);
+
+        // Force initialize the discover page
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🎯 DOMContentLoaded fired on discover page');
+            if (typeof initDiscoverPage === 'function') {
+                console.log('✅ initDiscoverPage function exists, calling it now...');
+                initDiscoverPage();
+            } else {
+                console.error('❌ initDiscoverPage function NOT found!');
+            }
+        });
     </script>
 </body>
 
