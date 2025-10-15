@@ -51,6 +51,10 @@ function setupSearchButton() {
                 alert('Please enter a location');
                 return;
             }
+            if (/^[\d\.\-\s,]+$/.test(newLocation)) {
+                alert('Please enter a city and state (e.g., "Dallas, TX") instead of coordinates');
+                return;
+            }
 
             if (isLoading) return;
 
@@ -93,13 +97,62 @@ function setupGPSButton() {
                 async (position) => {
                     const { latitude, longitude } = position.coords;
 
-                    map.setCenter({ lat: latitude, lng: longitude });
-                    map.setZoom(12);
+                    try {
+                        const apiKey = window.API_CONFIG?.googleMaps?.apiKey || '';
 
-                    locationInput.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-                    currentLocation = locationInput.value;
+                        if (!apiKey) {
+                            console.warn('Google Maps API key not configured');
+                            locationInput.value = 'Dallas, TX';
+                            currentLocation = 'Dallas, TX';
+                            await reloadEvents();
+                            gpsBtn.textContent = '📍';
+                            gpsBtn.disabled = false;
+                            return;
+                        }
 
-                    await reloadEvents();
+                        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`);
+                        const data = await response.json();
+
+                        if (data.results && data.results.length > 0) {
+                            let city = '';
+                            let state = '';
+
+                            for (const component of data.results[0].address_components) {
+                                if (component.types.includes('locality')) {
+                                    city = component.long_name;
+                                }
+                                if (component.types.includes('administrative_area_level_1')) {
+                                    state = component.short_name;
+                                }
+                            }
+
+                            if (city && state) {
+                                const locationString = `${city}, ${state}`;
+                                locationInput.value = locationString;
+                                currentLocation = locationString;
+                            } else {
+                                locationInput.value = 'Dallas, TX';
+                                currentLocation = 'Dallas, TX';
+                                alert('Could not determine city from your location. Using Dallas, TX');
+                            }
+                        } else {
+                            locationInput.value = 'Dallas, TX';
+                            currentLocation = 'Dallas, TX';
+                            alert('Could not determine city from your location. Using Dallas, TX');
+                        }
+
+                        map.setCenter({ lat: latitude, lng: longitude });
+                        map.setZoom(12);
+
+                        await reloadEvents();
+
+                    } catch (error) {
+                        console.error('Geocoding error:', error);
+                        locationInput.value = 'Dallas, TX';
+                        currentLocation = 'Dallas, TX';
+                        alert('Could not determine city from your location. Using Dallas, TX');
+                        await reloadEvents();
+                    }
 
                     gpsBtn.textContent = '📍';
                     gpsBtn.disabled = false;
