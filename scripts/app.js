@@ -357,8 +357,8 @@ function createEventCard(event) {
 
 function getCategoryColor(category) {
     const colors = {
-        music: '#9333EA',
-        food: '#F59E0B',
+        music: '#D8B4FE',
+        food: '#78350F',
         arts: '#EC4899',
         sports: '#10B981',
         community: '#3B82F6'

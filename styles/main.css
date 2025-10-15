@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #40E0D0;
-    --secondary-color: #3B82F6;
+    --primary-color: #007C7C;
+    --secondary-color: #1e40af;
     --neutral-light: #F8FAFB;
     --neutral-dark: #6B7280;
     --text-primary: #1F2937;
@@ -96,8 +96,13 @@ header {
 }
 
 .navigation a.active {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #0066cc, aqua);
     color: white;
+
+}
+
+.navigation a.active:hover {
+    color: var(--primary-color);
 }
 
 
@@ -154,19 +159,20 @@ header {
     border-radius: 8px;
     padding: 0.75rem;
     cursor: pointer;
-    color: white;
+    color: black;
     transition: all 0.3s ease;
 }
 
 .gps-btn:hover {
     background: var(--secondary-color);
     transform: scale(1.05);
+    color: black;
 }
 
 .btn-primary {
     background: white;
     color: var(--secondary-color);
-    border: none;
+    border: 2px solid var(--secondary-color);
     padding: 1rem 2rem;
     border-radius: var(--border-radius);
     font-weight: 600;
@@ -286,7 +292,7 @@ header {
     display: inline-block;
     padding: 0.25rem 0.75rem;
     background: var(--primary-color);
-    color: white;
+    color: black;
     border-radius: 15px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -321,7 +327,6 @@ header {
     border-top: 1px solid var(--neutral-light);
 }
 
-/* ENHANCED FAVORITE BUTTON STYLES */
 .favorite-btn {
     background: white;
     border: 2px solid #E5E7EB;
@@ -353,7 +358,6 @@ header {
     transform: scale(0.95);
 }
 
-/* Add a subtle pulse animation when favorited */
 @keyframes heartbeat {
 
     0%,
@@ -374,7 +378,6 @@ header {
     }
 }
 
-/* Tooltip for favorite button */
 .favorite-btn::before {
     content: attr(data-tooltip);
     position: absolute;
@@ -397,7 +400,7 @@ header {
 }
 
 .discover-header {
-    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color), aqua);
     padding: 3rem 2rem;
     text-align: center;
     color: white;
@@ -470,7 +473,7 @@ header {
 }
 
 .favorites-header {
-    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color), #40e0d0);
     padding: 3rem 2rem;
     text-align: center;
     color: white;
@@ -755,7 +758,7 @@ footer>.footer-content>div:last-child {
 
 footer>.footer-content>div:last-child p {
     margin: 0.5rem 0;
-    color: #333;
+    color: black;
 }
 
 footer>.footer-content>div:last-child a {
@@ -772,13 +775,13 @@ footer>.footer-content>div:last-child a:hover {
 #yearjs {
     display: block;
     margin: 0.5rem 0;
-    color: #333;
+    color: black;
 }
 
 #lastmodified {
     display: block;
     font-size: 0.85rem;
-    color: #666;
+    color: black;
     font-style: italic;
 }
 
@@ -828,12 +831,12 @@ footer>.footer-content>div:last-child a:hover {
 }
 
 .contact-info h3 {
-    color: var(--primary-color);
+    color: #0066cc;
     margin-bottom: 1rem;
 }
 
 .contact-info p {
-    color: var(--text-secondary);
+    color: black;
     margin: 0.5rem 0;
 }
 
@@ -907,7 +910,7 @@ footer>.footer-content>div:last-child a:hover {
 }
 
 .discover-header {
-    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color), aqua);
     padding: 3rem 2rem;
     text-align: center;
     color: white;
@@ -971,7 +974,7 @@ footer>.footer-content>div:last-child a:hover {
     cursor: not-allowed;
 }
 
-/* Fix for dropdown numbers */
+
 #quick-filter-dropdown {
     list-style: none !important;
 }
@@ -981,13 +984,12 @@ footer>.footer-content>div:last-child a:hover {
     list-style-type: none !important;
 }
 
-/* Remove any list styling from filter controls */
+
 .filter-controls * {
     list-style: none;
     list-style-type: none;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .discover-header h1 {
         font-size: 2rem;

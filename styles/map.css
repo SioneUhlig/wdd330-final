@@ -172,17 +172,18 @@
     position: absolute;
     bottom: 20px;
     right: 20px;
-    background: white;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
     padding: 1rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 5;
+    color: aqua;
 }
 
 .map-legend h3 {
     margin: 0 0 0.75rem 0;
     font-size: 1rem;
-    color: #1F2937;
+    color: aqua;
 }
 
 .legend-item {
@@ -200,6 +201,7 @@
     font-size: 1.5rem;
     width: 30px;
     text-align: center;
+    color: aqua;
 }
 
 .legend-item span:last-child {
@@ -207,7 +209,7 @@
 }
 
 #music {
-    color: #9333EA;
+    color: #CC99FF;
 }
 
 #food {
