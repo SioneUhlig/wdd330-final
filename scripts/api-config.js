@@ -44,7 +44,11 @@ const API = {
         });
 
         try {
-            console.log('Making request to:', url.toString());
+            console.log('🔍 API Request Details:');
+            console.log('  - Base URL:', baseUrl);
+            console.log('  - Endpoint:', endpoint);
+            console.log('  - Full URL:', url.toString());
+            console.log('  - Params:', params);
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -53,21 +57,28 @@ const API = {
                 }
             });
 
+            console.log('📡 Response Status:', response.status, response.statusText);
+
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('API Error Response:', errorText);
-                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                console.error('❌ API Error Response:', errorText);
+                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
             }
 
             const data = await response.json();
-            
+            console.log('✅ API Response Data:', data);
+
             if (data.error) {
                 throw new Error(data.message || data.error);
             }
 
             return data;
         } catch (error) {
-            console.error('Ticketmaster API request failed:', error);
+            console.error('❌ Ticketmaster API request failed:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
             throw error;
         }
     },
@@ -95,11 +106,11 @@ const API = {
         if (options.startDateTime) {
             params.startDateTime = options.startDateTime;
         }
-        
+
         if (options.endDateTime) {
             params.endDateTime = options.endDateTime;
         }
-        
+
         if (options.keyword) {
             params.keyword = options.keyword;
         }
@@ -190,7 +201,6 @@ const API = {
         };
     }
 };
-
 
 window.API_CONFIG = API_CONFIG;
 window.API = API;
